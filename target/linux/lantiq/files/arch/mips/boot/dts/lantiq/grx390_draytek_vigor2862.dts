@@ -1,0 +1,182 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "lantiq,xway", "lantiq,grx390";
+
+	aliases {
+		serial0 = &asc1;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	// two cores show up regardless of how many we configure here
+	cpus {
+		cpu@0 {
+			compatible = "mips,mips34Kc";
+			reg = <0>;
+		};
+
+		cpu@1 {
+			compatible = "mips,mips34Kc";
+			reg = <1>;
+		};
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00 0xff00000>;
+	};
+
+	biu@1f800000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "lantiq,biu", "simple-bus";
+		reg = <0x1f800000 0x800000>;
+		ranges = <0x00 0x1f800000 0x7fffff>;
+
+		icu0: icu0@80200 {
+			/*
+			 * merged the two seperate icu nodes into
+			 * one and merged all the smaller register maps into
+			 * two big ones, 1 for each icu. It is the same way on vr9.
+			 */
+			#interrupt-cells = <1>;
+			interrupt-controller;
+			compatible = "lantiq,icu";
+			reg = <0x80200 0xc8   /* icu0 */
+			       0x80300 0xc8>; /* icu1 */
+		};
+
+		/*
+		 * will be fine as danube, amazonse and falcon have the
+		 * same watchdog node?
+		 * vr9, ar9 are closer to it I would suspect, but they
+		 * have same registers, different driver (lantiq,xrx100-wdt)
+		 * 
+		 * xrx100-wdt seems to have some more functionality regarding
+		 * the rcu?
+		 */
+		wdt: watchdog@803f0 {
+			compatible = "lantiq,wdt";
+			reg = <0x803f0 0x10>;
+		};
+	};
+
+	sram: sram@1f000000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "lantiq,sram", "simple-bus";
+		reg = <0x1f000000 0x800000>;
+		ranges = <0x00 0x1f000000 0x7fffff>;
+
+		// these three are core platform devices which the kernel checks for
+		// if not present, the kernel panics
+		eiu0: eiu@101000 {
+			#interrupt-cells = <1>;
+			interrupt-controller;
+			compatible = "lantiq,eiu-xway";
+			reg = <0x101000 0x1000>;
+			interrupt-parent = <&icu0>;
+			lantiq,eiu-irqs = <166 135 66 40 41 42>;
+		};
+
+		pmu0: pmu@102000 {
+			compatible = "lantiq,pmu-xway";
+			reg = <0x102000 0x1000>;
+		};
+
+		cgu0: cgu@103000 {
+			compatible = "lantiq,cgu-xway";
+			reg = <0x103000 0x1000>;
+		};
+
+		/* just copied this from vr9; no clue if it works */
+
+		/* there might be a way to initialize this rcu via the fpi
+		 * bus driver; lantiq,rcu property does some initialization
+		 *
+		 * also note that the lantiq,xrx200-rcu string has no kernel
+		 * driver looking for it, effectively this uses the simple-mfd
+		 * or syscon driver.
+		 */
+		rcu0: rcu@203000 {
+			compatible = "lantiq,xrx200-rcu", "simple-mfd", "syscon";
+			reg = <0x203000 0x1000>;
+			ranges = <0x0 0x203000 0x1000>;
+			big-endian;
+
+			reset0: reset-controller@10 {
+				compatible = "lantiq,xrx200-reset";
+				reg = <0x10 4>, <0x14 4>;
+
+				#reset-cells = <2>;
+			};
+
+			reset1: reset-controller@48 {
+				compatible = "lantiq,xrx200-reset";
+				reg = <0x48 4>, <0x24 4>;
+
+				#reset-cells = <2>;
+			};
+			// todo: reboot node
+
+		};
+	};
+
+	/* 
+	 * may need work? only vr9 uses lantiq,xrx200-fpi, the
+	 * others use lantiq,fpi
+	 */
+
+	fpi: fpi@10000000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "lantiq,fpi", "simple-bus";
+		ranges = <0x00 0x10000000 0xeefffff>; // are these correct?
+		reg = <0x10000000 0xef00000>; // are these correct?
+
+		localbus: localbus@0 {
+			compatible = "lantiq,localbus", "simple-bus";
+			#address-cells = <2>;
+			#size-cells = <1>;
+			/*
+			 * copied this from ar9/vr9/xrx330/everything else
+			 * that seems to have the same.
+			 */
+			ranges = <0 0 0x00 0x3ffffff   /* addrsel0 ??? */
+					 1 0 0x4000000 0x4000010>; /* addrsel1 ??? */
+		};
+
+		// some timer oid
+		gptu@e100a00 { // done
+			compatible = "lantiq,gptu-xway";
+			reg = <0xe100a00 0x100>;
+			interrupt-parent = <&icu0>;
+			interrupts = <126 127 128 129 130 131>;
+		};
+
+		asc1: serial@e100c00 {
+			compatible = "lantiq,asc";
+			reg = <0xe100c00 0x400>;
+			interrupt-parent = <&icu0>;
+			interrupts = <112 113 114>;
+		};
+
+		// Direct Memory Access?
+		dma0: dma@e104100 {
+			compatible = "lantiq,dma-xway";
+			reg = <0xe104100 0x800>;
+		};
+
+		// External Bus Unit; related to nand
+		ebu0: ebu@6000000 {
+			compatible = "lantiq,ebu-xway";
+			reg = <0x6000000 0x100 0x6000100 0x100>; // why two, not seen before
+			reg-names = "ebunand_reg", "hsnand_reg";
+		};
+	};
+};
