@@ -75,7 +75,7 @@
 
 		// these three are core platform devices which the kernel checks for
 		// if not present, the kernel panics
-		eiu0: eiu@101000 {
+		eiu@101000 {
 			#interrupt-cells = <1>;
 			interrupt-controller;
 			compatible = "lantiq,eiu-xway";
@@ -84,14 +84,19 @@
 			lantiq,eiu-irqs = <166 135 66 40 41 42>;
 		};
 
-		pmu0: pmu@102000 {
+		pmu@102000 { 
 			compatible = "lantiq,pmu-xway";
 			reg = <0x102000 0x1000>;
 		};
 
-		cgu0: cgu@103000 {
+		cgu@103000 {
 			compatible = "lantiq,cgu-xway";
 			reg = <0x103000 0x1000>;
+		};
+		
+		dcdc@106a00 { // good
+			compatible = "lantiq,dcdc-xrx200";
+			reg = <0x106a00 0x200>;
 		};
 
 		/* just copied this from vr9; no clue if it works */
@@ -151,7 +156,6 @@
 					 1 0 0x4000000 0x4000010>; /* addrsel1 ??? */
 		};
 
-		// some timer oid
 		gptu@e100a00 { // done
 			compatible = "lantiq,gptu-xway";
 			reg = <0xe100a00 0x100>;
@@ -159,20 +163,19 @@
 			interrupts = <126 127 128 129 130 131>;
 		};
 
-		asc1: serial@e100c00 {
+		asc1: serial@e100c00 { // done
 			compatible = "lantiq,asc";
 			reg = <0xe100c00 0x400>;
 			interrupt-parent = <&icu0>;
 			interrupts = <112 113 114>;
 		};
 
-		// Direct Memory Access?
-		dma0: dma@e104100 {
+		dma@e104100 { // done
 			compatible = "lantiq,dma-xway";
 			reg = <0xe104100 0x800>;
 		};
 
-		// External Bus Unit; related to nand
+		// External Bus Unit; related to nand; not sure if confured right
 		ebu0: ebu@6000000 {
 			compatible = "lantiq,ebu-xway";
 			reg = <0x6000000 0x100 0x6000100 0x100>; // why two, not seen before
