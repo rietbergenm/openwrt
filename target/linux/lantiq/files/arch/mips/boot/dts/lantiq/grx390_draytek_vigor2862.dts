@@ -258,8 +258,7 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		// drayos mentions a bad block table on flash somewhere
-		nand-on-flash-bbt;
+		nand-on-flash-bbt; // gets detected properly by the kernel!
 
 		// do we need pinctrl to select nand?
 
@@ -324,9 +323,9 @@
 		#address-cells = <1>;
 		// should be 0 according to kernel docs,
 		// but example uses 1...
-		#size-cells = <0>; 
+		#size-cells = <0>;  // does not seem to matter 1 or 0
 
-		m25p80@1 {
+		m25p80@1 { // chip select 1
 			#address-cells = <1>;
 			#size-cells = <1>;
 			compatible = "jedec,spi-nor";
@@ -356,7 +355,12 @@
 					read-only;
 				};
 
-				// last two partitions are out of reach??
+				/* last two partitions are out of reach??
+				 * makes sense, as 0x40000 is 256KB, the size of our
+				 * spi chip. So this is a questionable partition map...
+				 * also, why would there be a kernel on the spi chip
+				 * shouldn't this just hold the bootloader and fw?
+				 */
 				partition@40000 {
 					reg = <0x40000 0x10000>;
 					label = "NVRAM";
