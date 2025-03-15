@@ -227,6 +227,22 @@
 						lantiq,pull = <0>;
 					};
 				};
+
+				spi_pins: spi {
+					input_pins {
+						lantiq,groups = "spi_di";
+						lantiq,function = "spi";
+						lantiq,pull = <2>;
+					};
+
+					output_pins {
+						lantiq,pins = "spi_do", "spi_clk", "spi_cs1", "spi_cs3";
+						lantiq,function = "spi";
+						lantiq,open-drain = <0>;
+						lantiq,pull = <0>;
+						lantiq,output = <1>;
+					};
+				};
 			};
 		};
 	};
@@ -292,6 +308,66 @@
 				label = "res";
 				reg = <0x34c0000 0xb40000>;
 				read-only;
+			};
+		};
+	};
+};
+
+
+&fpi {
+	spi: spi@e100800 {
+		compatible = "lantiq,xrx200-spi", "lantiq,xrx100-spi";
+		reg = <0xe100800 0x100>;
+		interrupt-parent = <&icu0>;
+		interrupts = <22 23 24>;
+		interrupt-names = "spi_rx", "spi_tx", "spi_err";
+		#address-cells = <1>;
+		// should be 0 according to kernel docs,
+		// but example uses 1...
+		#size-cells = <0>; 
+
+		m25p80@1 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "jedec,spi-nor";
+			reg = <1>;
+			spi-max-frequency = <0xf4240>;
+
+			partitions {
+				compatible = "fixed-partitions";
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				partition@0 {
+					reg = <0x00 0x20000>;
+					label = "SPI (RO) U-Boot Image";
+					read-only;
+				};
+
+				partition@20000 {
+					reg = <0x20000 0x10000>;
+					label = "ENV_MAC";
+					read-only;
+				};
+
+				partition@30000 {
+					reg = <0x30000 0x10000>;
+					label = "DPF";
+					read-only;
+				};
+
+				// last two partitions are out of reach??
+				partition@40000 {
+					reg = <0x40000 0x10000>;
+					label = "NVRAM";
+					read-only;
+				};
+
+				partition@500000 {
+					reg = <0x50000 0x3a0000>;
+					label = "kernel";
+					read-only;
+				};
 			};
 		};
 	};
