@@ -231,3 +231,68 @@
 		};
 	};
 };
+
+&localbus {
+	// not fully working yet, partitions don't show up
+	nand@1 {
+		compatible = "lantiq,nand-xway";
+		lantiq,cs = <1>;
+		bank-width = <2>;
+		reg = <1 0x0 0x2000000>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		// drayos mentions a bad block table on flash somewhere
+		nand-on-flash-bbt;
+
+		// do we need pinctrl to select nand?
+
+		partitions {
+			compatible = "fixed_partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "uboot";
+				reg = <0x00 0x100000>;
+				read-only;
+			};
+
+			partition@100000 {
+				label = "ubootconfigA";
+				reg = <0x100000 0x40000>;
+				read-only;
+			};
+
+			partition@140000 {
+				label = "ubootconfigB";
+				reg = <0x140000 0x40000>;
+				read-only;
+			};
+
+			partition@180000 {
+				label = "gphyfirmware";
+				reg = <0x180000 0x40000>;
+				read-only;
+			};
+
+			partition@1c0000 {
+				label = "system_sw";
+				reg = <0x1c0000 0x3200000>;
+				read-only;
+			};
+
+			partition@33c0000 {
+				label = "calibration";
+				reg = <0x33c0000 0x100000>;
+				read-only;
+			};
+
+			partition@34c0000 {
+				label = "res";
+				reg = <0x34c0000 0xb40000>;
+				read-only;
+			};
+		};
+	};
+};
