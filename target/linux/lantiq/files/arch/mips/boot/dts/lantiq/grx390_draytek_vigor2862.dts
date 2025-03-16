@@ -1,29 +1,12 @@
-/dts-v1/;
+/include/ "grx390.dtsi"
+
 
 / {
-	#address-cells = <1>;
-	#size-cells = <1>;
-	compatible = "lantiq,xway", "lantiq,grx390";
-
-	aliases {
-		serial0 = &asc1;
-	};
+	compatible = "draytek,vigor2862", "lantiq,xway", "lantiq,grx390";
+	model = "Draytek Vigor2862";
 
 	chosen {
-		stdout-path = "serial0:115200n8";
-	};
-
-	// two cores show up regardless of how many we configure here
-	cpus {
-		cpu@0 {
-			compatible = "mips,mips34Kc";
-			reg = <0>;
-		};
-
-		cpu@1 {
-			compatible = "mips,mips34Kc";
-			reg = <1>;
-		};
+		bootargs = "console=ttyLTQ0,115200";
 	};
 
 	memory@0 {
@@ -31,252 +14,27 @@
 		reg = <0x00 0xff00000>;
 	};
 
-	biu@1f800000 {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "lantiq,biu", "simple-bus";
-		reg = <0x1f800000 0x800000>;
-		ranges = <0x00 0x1f800000 0x7fffff>;
+	usb0_vbus: regulator-usb0-vbus {
+		compatible = "regulator-fixed";
 
-		icu0: icu0@80200 {
-			/*
-			 * merged the two seperate icu nodes into
-			 * one and merged all the smaller register maps into
-			 * two big ones, 1 for each icu. It is the same way on vr9.
-			 */
-			#interrupt-cells = <1>;
-			interrupt-controller;
-			compatible = "lantiq,icu";
-			reg = <0x80200 0xc8   /* icu0 */
-			       0x80300 0xc8>; /* icu1 */
-		};
+		regulator-name = "USB0_VBUS";
 
-		/*
-		 * will be fine as danube, amazonse and falcon have the
-		 * same watchdog node?
-		 * vr9, ar9 are closer to it I would suspect, but they
-		 * have same registers, different driver (lantiq,xrx100-wdt)
-		 * 
-		 * xrx100-wdt seems to have some more functionality regarding
-		 * the rcu?
-		 */
-		wdt: watchdog@803f0 {
-			compatible = "lantiq,wdt";
-			reg = <0x803f0 0x10>;
-		};
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+
+		gpios = <&stp 4 0>; // active high (#include later)
+		enable-active-high;
 	};
 
-	sram: sram@1f000000 {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "lantiq,sram", "simple-bus";
-		reg = <0x1f000000 0x800000>;
-		ranges = <0x00 0x1f000000 0x7fffff>;
+	usb1_vbus: regulator-usb1-vbus {
+		compatible = "regulator-fixed";
+		regulator-name = "USB1_VBUS";
 
-		// these three are core platform devices which the kernel checks for
-		// if not present, the kernel panics
-		eiu@101000 {
-			#interrupt-cells = <1>;
-			interrupt-controller;
-			compatible = "lantiq,eiu-xway";
-			reg = <0x101000 0x1000>;
-			interrupt-parent = <&icu0>;
-			lantiq,eiu-irqs = <166 135 66 40 41 42>;
-		};
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
 
-		pmu@102000 { 
-			compatible = "lantiq,pmu-xway";
-			reg = <0x102000 0x1000>;
-		};
-
-		cgu@103000 {
-			compatible = "lantiq,cgu-xway";
-			reg = <0x103000 0x1000>;
-			// might have to add lantiq,phy_clk_src later for gphy
-		};
-		
-		dcdc@106a00 { // good
-			compatible = "lantiq,dcdc-xrx200";
-			reg = <0x106a00 0x200>;
-		};
-
-		/* just copied this from vr9; no clue if it works */
-
-		/* there might be a way to initialize this rcu via the fpi
-		 * bus driver; lantiq,rcu property does some initialization
-		 *
-		 * also note that the lantiq,xrx200-rcu string has no kernel
-		 * driver looking for it, effectively this uses the simple-mfd
-		 * or syscon driver.
-		 */
-		rcu0: rcu@203000 {
-			compatible = "lantiq,xrx200-rcu", "simple-mfd", "syscon";
-			reg = <0x203000 0x1000>;
-			ranges = <0x0 0x203000 0x1000>;
-			big-endian;
-
-			reset0: reset-controller@10 {
-				compatible = "lantiq,xrx200-reset";
-				reg = <0x10 4>, <0x14 4>;
-
-				#reset-cells = <2>;
-			};
-
-			reset1: reset-controller@48 {
-				compatible = "lantiq,xrx200-reset";
-				reg = <0x48 4>, <0x24 4>;
-
-				#reset-cells = <2>;
-			};
-
-			// xrx300 and xrx200 do the same
-			usb_phy0: usb2-phy@18 {
-				compatible = "lantiq,xrx200-usb2-phy";
-				reg = <0x18 4>, <0x38 4>;
-
-				resets = <&reset1 4 4>, <&reset0 4 4>;
-				reset-names = "phy", "ctrl";
-				#phy-cells = <0>;
-			};
-
-			usb_phy1: usb2-phy@34 {
-				compatible = "lantiq,xrx200-usb2-phy";
-				reg = <0x34 4>, <0x3c 4>;
-
-				resets = <&reset1 5 5>, <&reset0 4 4>;
-				reset-names = "phy", "ctrl";
-				#phy-cells = <0>;
-			};
-
-			// todo: reboot node
-
-		};
-	};
-
-	/* 
-	 * may need work? only vr9 uses lantiq,xrx200-fpi, the
-	 * others use lantiq,fpi
-	 */
-
-	fpi: fpi@10000000 {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "lantiq,fpi", "simple-bus";
-		ranges = <0x00 0x10000000 0xeefffff>; // are these correct?
-		reg = <0x10000000 0xef00000>; // are these correct?
-
-		localbus: localbus@0 {
-			compatible = "lantiq,localbus", "simple-bus";
-			#address-cells = <2>;
-			#size-cells = <1>;
-			/*
-			 * copied this from ar9/vr9/xrx330/everything else
-			 * that seems to have the same.
-			 */
-			ranges = <0 0 0x00 0x3ffffff   /* addrsel0 ??? */
-					 1 0 0x4000000 0x4000010>; /* addrsel1 ??? */
-		};
-
-		gptu@e100a00 { // done
-			compatible = "lantiq,gptu-xway";
-			reg = <0xe100a00 0x100>;
-			interrupt-parent = <&icu0>;
-			interrupts = <126 127 128 129 130 131>;
-		};
-
-		asc1: serial@e100c00 { // done
-			compatible = "lantiq,asc";
-			reg = <0xe100c00 0x400>;
-			interrupt-parent = <&icu0>;
-			interrupts = <112 113 114>;
-		};
-
-		dma@e104100 { // done
-			compatible = "lantiq,dma-xway";
-			reg = <0xe104100 0x800>;
-		};
-
-		// External Bus Unit; related to nand; not sure if confured right
-		ebu0: ebu@6000000 {
-			compatible = "lantiq,ebu-xway";
-			reg = <0x6000000 0x100 0x6000100 0x100>; // why two, not seen before
-			reg-names = "ebunand_reg", "hsnand_reg";
-		};
-	};
-};
-
-&fpi {
-	gpio: pinmux@e100b10 {
-		compatible = "lantiq,xrx200-pinctrl";
-		#gpio-cells = <2>;
-		gpio-controller;
-		reg = <0xe100b10 0xa0>;
-
-		interrupt-parent = <&icu0>;
-
-		state_default: pinmux {
-
-			// most likely good like this
-			mdio_pins: mdio {
-				lantiq,groups = "mdio"; // io42 & io43
-				lantiq,function = "mdio";
-			};
-
-			stp_pins: stp {
-				lantiq,groups = "stp";
-				lantiq,function = "stp";
-
-				lantiq,pull = <0>;
-				lantiq,open-drain = <0>;
-				lantiq,output = <1>;
-			};
-
-			nand_pins: nand {
-				output_pins { // gpio's 24 13 49
-				lantiq,groups = "nand cle",
-					"nand ale",
-						"nand rd";
-						lantiq,function = "ebu";
-
-						lantiq,output = <1>;
-						lantiq,open-drain = <0>;
-						lantiq,pull = <0>;
-				};
-
-				input_pins {
-					lantiq,groups = "nand rdy"; // gpio48
-					lantiq,function = "ebu";
-
-					lantiq,output = <0>;
-					lantiq,pull = <2>;
-				};
-			};
-
-			nand_cs1_pins: nand-cs1 {
-				mux {
-					lantiq,groups = "nand cs1";
-					lantiq,function = "ebu";
-					lantiq,open-drain = <0>;
-					lantiq,pull = <0>;
-				};
-			};
-
-			spi_pins: spi {
-				input_pins {
-					lantiq,groups = "spi_di";
-					lantiq,function = "spi";
-					lantiq,pull = <2>;
-				};
-
-				output_pins {
-					lantiq,pins = "spi_do", "spi_clk", "spi_cs1", "spi_cs3";
-					lantiq,function = "spi";
-					lantiq,open-drain = <0>;
-					lantiq,pull = <0>;
-					lantiq,output = <1>;
-				};
-			};
-		};
+		gpios = <&stp 7 0>; // active high replace with #include later
+		enable-active-high;
 	};
 };
 
@@ -292,7 +50,7 @@
 
 		nand-on-flash-bbt; // gets detected properly by the kernel!
 
-		//status = "disabled";
+		// ecc?
 
 		partitions {
 			compatible = "fixed_partitions";
@@ -345,121 +103,74 @@
 };
 
 
-&fpi {
-	spi: spi@e100800 {
-		compatible = "lantiq,xrx200-spi", "lantiq,xrx100-spi";
-		reg = <0xe100800 0x100>;
-		interrupt-parent = <&icu0>;
-		interrupts = <22 23 24>;
-		interrupt-names = "spi_rx", "spi_tx", "spi_err";
+&spi {
+	status = "okay";
+
+	m25p80@1 { 
 		#address-cells = <1>;
-		// should be 0 according to kernel docs,
-		// but example uses 1...
-		#size-cells = <0>;  // does not seem to matter 1 or 0
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <1>;
+		spi-max-frequency = <0xf4240>;
 
-		//status = "disabled";
-
-		m25p80@1 { // chip select 1
+		partitions {
+			compatible = "fixed-partitions";
 			#address-cells = <1>;
 			#size-cells = <1>;
-			compatible = "jedec,spi-nor";
-			reg = <1>;
-			spi-max-frequency = <0xf4240>;
 
-			partitions {
-				compatible = "fixed-partitions";
-				#address-cells = <1>;
-				#size-cells = <1>;
+			partition@0 {
+				reg = <0x00 0x20000>;
+				label = "SPI (RO) U-Boot Image";
+				read-only;
+			};
 
-				partition@0 {
-					reg = <0x00 0x20000>;
-					label = "SPI (RO) U-Boot Image";
-					read-only;
-				};
+			partition@20000 {
+				reg = <0x20000 0x10000>;
+				label = "ENV_MAC";
+				read-only;
+			};
 
-				partition@20000 {
-					reg = <0x20000 0x10000>;
-					label = "ENV_MAC";
-					read-only;
-				};
+			partition@30000 {
+				reg = <0x30000 0x10000>;
+				label = "DPF";
+				read-only;
+			};
 
-				partition@30000 {
-					reg = <0x30000 0x10000>;
-					label = "DPF";
-					read-only;
-				};
+			/* last two partitions are out of reach??
+			 * makes sense, as 0x40000 is 256KB, the size of our
+			 * spi chip. So this is a questionable partition map...
+			 * also, why would there be a kernel on the spi chip
+			 * shouldn't this just hold the bootloader and fw?
+			 */
+			partition@40000 {
+				reg = <0x40000 0x10000>;
+				label = "NVRAM";
+				read-only;
+			};
 
-				/* last two partitions are out of reach??
-				 * makes sense, as 0x40000 is 256KB, the size of our
-				 * spi chip. So this is a questionable partition map...
-				 * also, why would there be a kernel on the spi chip
-				 * shouldn't this just hold the bootloader and fw?
-				 */
-				partition@40000 {
-					reg = <0x40000 0x10000>;
-					label = "NVRAM";
-					read-only;
-				};
-
-				partition@500000 {
-					reg = <0x50000 0x3a0000>;
-					label = "kernel";
-					read-only;
-				};
+			partition@500000 {
+				reg = <0x50000 0x3a0000>;
+				label = "kernel";
+				read-only;
 			};
 		};
 	};
 };
 
-
-&fpi {
-	usb0: usb@e101000 {
-		compatible = "lantiq,xrx200-usb";
-		reg = <0xe101000 0x1000
-					0xe120000 0x10000
-					0xe140000 0x20000>;
-		interrupt-parent = <&icu0>;
-		interrupts = <62 91>;
-		dr_mode = "host";
-		phys = <&usb_phy0>;
-		phy-names = "usb2-phy";
-
-		ehci_port1: port@1 {
-			reg = <1>;
-			#trigger-source-cells = <0>;
-		};
-	};
-
-	usb1: usb@e106000 {
-		compatible = "lantiq,xrx200-usb";
-		reg = <0xe106000 0x1000
-					0xe1e0000 0x10000
-					0xe1c0000 0x20000>;
-		interrupt-parent = <&icu0>;
-		interrupts = <91>;
-		dr_mode = "host";
-		phys = <&usb_phy1>;
-		phy-names = "usb2-phy";
-
-		ehci_port2: port@1 {
-			reg = <1>;
-			#trigger-source-cells = <0>;
-		};
-	};
+&usb_phy0 {
+	status = "okay";
 };
 
-&fpi {
-	stp: stp@e100bb0 {
-		compatible = "lantiq,gpio-stp-xway";
-		reg = <0xe100bb0 0x40>;
-		#gpio-cells = <2>;
-		gpio-controller;
+&usb_phy1 {
+	status = "okay";
+};
 
-		lantiq,shadow = <0xffff>;
-		lantiq,groups = <0x07>;
-		lantiq,phy1 = <0x03>;
-		lantiq,phy2 = <0x03>;
-		lantiq,phy3 = <0x03>;
-		lantiq,phy4 = <0x03>;
-	};
+&usb0 {
+	status = "okay";
+	vbus-supply = <&usb0_vbus>;
+};
+
+&usb1 {
+	status = "okay";
+	vbus-supply = <&usb1_vbus>;
 };
