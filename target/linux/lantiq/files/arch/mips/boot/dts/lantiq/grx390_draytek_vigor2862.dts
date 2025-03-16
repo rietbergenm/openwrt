@@ -92,6 +92,7 @@
 		cgu@103000 {
 			compatible = "lantiq,cgu-xway";
 			reg = <0x103000 0x1000>;
+			// might have to add lantiq,phy_clk_src later for gphy
 		};
 		
 		dcdc@106a00 { // good
@@ -127,6 +128,26 @@
 
 				#reset-cells = <2>;
 			};
+
+			// xrx300 and xrx200 do the same
+			usb_phy0: usb2-phy@18 {
+				compatible = "lantiq,xrx200-usb2-phy";
+				reg = <0x18 4>, <0x38 4>;
+
+				resets = <&reset1 4 4>, <&reset0 4 4>;
+				reset-names = "phy", "ctrl";
+				#phy-cells = <0>;
+			};
+
+			usb_phy1: usb2-phy@34 {
+				compatible = "lantiq,xrx200-usb2-phy";
+				reg = <0x34 4>, <0x3c 4>;
+
+				resets = <&reset1 5 5>, <&reset0 4 4>;
+				reset-names = "phy", "ctrl";
+				#phy-cells = <0>;
+			};
+
 			// todo: reboot node
 
 		};
@@ -262,7 +283,7 @@
 
 		nand-on-flash-bbt; // gets detected properly by the kernel!
 
-		// do we need pinctrl to select nand?
+		//status = "disabled";
 
 		partitions {
 			compatible = "fixed_partitions";
@@ -327,6 +348,8 @@
 		// but example uses 1...
 		#size-cells = <0>;  // does not seem to matter 1 or 0
 
+		//status = "disabled";
+
 		m25p80@1 { // chip select 1
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -375,6 +398,43 @@
 					read-only;
 				};
 			};
+		};
+	};
+};
+
+
+&fpi {
+	usb0: usb@e101000 {
+		compatible = "lantiq,xrx200-usb";
+		reg = <0xe101000 0x1000
+					0xe120000 0x10000
+					0xe140000 0x20000>;
+		interrupt-parent = <&icu0>;
+		interrupts = <62 91>;
+		dr_mode = "host";
+		phys = <&usb_phy0>;
+		phy-names = "usb2-phy";
+
+		ehci_port1: port@1 {
+			reg = <1>;
+			#trigger-source-cells = <0>;
+		};
+	};
+
+	usb1: usb@e106000 {
+		compatible = "lantiq,xrx200-usb";
+		reg = <0xe106000 0x1000
+					0xe1e0000 0x10000
+					0xe1c0000 0x20000>;
+		interrupt-parent = <&icu0>;
+		interrupts = <91>;
+		dr_mode = "host";
+		phys = <&usb_phy1>;
+		phy-names = "usb2-phy";
+
+		ehci_port2: port@1 {
+			reg = <1>;
+			#trigger-source-cells = <0>;
 		};
 	};
 };
