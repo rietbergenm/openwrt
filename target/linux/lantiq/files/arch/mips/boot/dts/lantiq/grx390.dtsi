@@ -306,11 +306,9 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			status = "disabled";
-			compatible = "lantiq,xrx200-usb";
-			// look into what the driver does with these registers
+			compatible = "lantiq,xrx300-usb";
 			reg = <0xe101000 0x1000
-			0xe120000 0x10000
-			0xe140000 0x20000>;
+						0xe120000 0x3f000>;
 			interrupt-parent = <&icu0>;
 			interrupts = <62 91>;
 			dr_mode = "host";
@@ -327,11 +325,9 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			status = "disabled";
-			compatible = "lantiq,xrx200-usb";
-			// look into what the driver does with these registers
+			compatible = "lantiq,xrx300-usb";
 			reg = <0xe106000 0x1000
-			0xe1e0000 0x10000
-			0xe1c0000 0x20000>;
+						0xe1e0000 0x3f000>;
 			interrupt-parent = <&icu0>;
 			interrupts = <91>;
 			dr_mode = "host";
