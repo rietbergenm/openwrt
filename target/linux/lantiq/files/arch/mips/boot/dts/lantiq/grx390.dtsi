@@ -114,6 +114,7 @@
 			reset0: reset-controller@10 {
 				compatible = "lantiq,xrx200-reset";
 				reg = <0x10 4>, <0x14 4>;
+				reg-names = "reset", "status";
 
 				#reset-cells = <2>;
 			};
@@ -121,6 +122,7 @@
 			reset1: reset-controller@48 {
 				compatible = "lantiq,xrx200-reset";
 				reg = <0x48 4>, <0x24 4>;
+				reg-names = "reset", "status";
 
 				#reset-cells = <2>;
 			};
@@ -340,5 +342,94 @@
 			};
 		};
 
+		gswip: switch@e108000 {
+			compatible = "lantiq,xrx330-gswip";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0xe108000 0x3000>,	/* switch */
+						<0xe10b100 0x70>,		/* mdio */
+						<0xe10b1d8 0x30>;		/* mii */
+			reg-names = "switch", "mdio", "mii";
+			dsa,member = <0 0>;
+
+			gswip_ports: ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@6 {
+					reg = <0x6>;
+					phy-mode = "internal";
+					ethernet = <&eth0>;
+
+					fixed-link {
+						speed = <1000>;
+						full-duplex;
+					};
+				};
+			};
+
+			gswip_mdio: mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				compatible = "latiq,xrx200-mdio";
+			};
+
+			gphy-fw {
+				compatible = "lantiq,xrx330-gphy-fw", "lantiq,gphy-fw";
+				lantiq,rcu = <&rcu0>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				/*
+				 * found out the registers and reset specs
+				 * from gpl dump of telekom router
+				 * uboot was very readable and switch_api also helped.
+				 */
+				gphy0: gphy@20 {
+					reg = <0x20>;
+
+					resets = <&reset0 31 30>;
+					reset-names = "gphy";
+				};
+
+				gphy1: gphy@58 {
+					reg = <0x58>;
+
+					resets = <&reset0 29 28>;
+					reset-names = "gphy";
+				};
+
+				gphy2: gphy@ac {
+					reg = <0xac>;
+
+					resets = <&reset0 28 13>;
+					reset-names = "gphy";
+				};
+
+				gphy3: gphy@264 {
+					reg = <0x264>;
+
+					resets = <&reset0 10 10>;
+					reset-names = "gphy";
+				};
+			};
+		};
+
+		eth0: eth@e10b308 { // address is correct (ar10.h)
+			compatible = "lantiq,xrx200-net";
+			reg = <0xe10b308 0x30>; /* pmac */
+			interrupt-parent = <&icu0>;
+			interrupts = <73>, <72>;
+			interrupt-names = "tx", "rx";
+			resets = <&reset0 21 16>, <&reset0 8 8>, <&reset0 3 3>;
+			reset-names = "switch", "ppe", "ppe_dsp";
+			#adderss-cells = <1>;
+			#size-cells = <0>;
+
+			fixed-link {
+				speed = <1000>;
+				full-duplex;
+			};
+		};
 	};
 };

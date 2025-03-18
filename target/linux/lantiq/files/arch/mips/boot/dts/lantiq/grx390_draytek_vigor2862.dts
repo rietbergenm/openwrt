@@ -38,6 +38,86 @@
 	};
 };
 
+&gphy0 {
+	lantiq,gphy-mode = <1>; // GPHY_MODE_GE include later
+};
+
+&gphy1 {
+	lantiq,gphy-mode = <1>; // GPHY_MODE_GE
+};
+
+&gphy2 {
+	lantiq,gphy-mode = <1>; // GPHY_MODE_GE
+};
+
+&gphy3 {
+	lantiq,gphy-mode = <1>; // GPHY_MODE_GE
+};
+
+&gswip_mdio {
+	phy0: ethernet-phy@0 {
+		reg = <0x00>;
+	};
+
+	phy1: ethernet-phy@1 {
+		reg = <0x01>;
+	};
+
+	phy5: ethernet-phy@5 {
+		reg = <0x05>;
+	};
+
+	phy11: ethernet-phy@11 {
+		reg = <0x11>;
+	};
+
+	phy13: ethernet-phy@13 {
+		reg = <0x13>;
+	};
+};
+
+/*
+ * port 1 2 3 4 6 are internal;
+ * 0 can do all types of rgmii in addition to rmii and gmii;
+ * 5 can do all types of rgmii in addition to rmii and internal;
+ */
+&gswip_ports {
+	port@0 {
+		reg = <0>;
+		label = "port0";
+		phy-mode = "rgmii";
+		phy-handle = <&phy0>;
+	};
+
+	port@1 {
+		reg = <1>;
+		label = "port1";
+		phy-mode = "internal";
+		phy-handle = <&phy1>;
+	};
+
+	port@2 {
+		reg = <2>;
+		label = "port2";
+		phy-mode = "internal";
+		phy-handle = <&phy11>;
+	};
+
+	port@4 {
+		reg = <4>;
+		label = "port4";
+		phy-mode = "internal";
+		phy-handle = <&phy13>;
+	};
+
+	port@5 {
+		reg = <5>;
+		label = "port5";
+		phy-mode = "rgmii";
+		phy-handle = <&phy5>;
+	};
+};
+
 &localbus {
 	// not fully working yet, partitions don't show up
 	nand@1 {
