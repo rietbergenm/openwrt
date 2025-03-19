@@ -49,18 +49,11 @@
 			       0x80300 0xc8>; /* icu1 */
 		};
 
-		/*
-		 * will be fine as danube, amazonse and falcon have the
-		 * same watchdog node?
-		 * vr9, ar9 are closer to it I would suspect, but they
-		 * have same registers, different driver (lantiq,xrx100-wdt)
-		 * 
-		 * xrx100-wdt seems to have some more functionality regarding
-		 * the rcu?
-		 */
-		wdt: watchdog@803f0 {
-			compatible = "lantiq,wdt";
+		watchdog@803f0 {
+			compatible = "lantiq,xrx100-wdt";
 			reg = <0x803f0 0x10>;
+
+			regmap = <&rcu0>;
 		};
 	};
 
