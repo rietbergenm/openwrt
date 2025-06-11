@@ -50,7 +50,7 @@
 		};
 
 		watchdog@803f0 {
-			compatible = "lantiq,xrx100-wdt";
+			compatible = "lantiq,xrx100-wdt", "lantiq,wdt";
 			reg = <0x803f0 0x10>;
 
 			regmap = <&rcu0>;
@@ -136,7 +136,7 @@
 				reg = <0x34 4>, <0x3c 4>;
 				status = "disabled";
 
-				resets = <&reset1 5 5>, <&reset0 4 4>;
+				resets = <&reset1 5 4>, <&reset0 4 4>;
 				reset-names = "phy", "ctrl";
 				#phy-cells = <0>;
 			};
@@ -145,6 +145,8 @@
 				compatible = "syscon-reboot";
 				offset = <0x10>;
 				mask = <0xe0000000>;
+				
+				// do we need more; like regmap?
 			};
 		};
 	};
@@ -170,7 +172,7 @@
 			 * that seems to have the same.
 			 */
 			ranges = <0 0 0x00 0x3ffffff   /* addrsel0 ??? */
-					 1 0 0x4000000 0x4000010>; /* addrsel1 ??? */
+			          1 0 0x4000000 0x4000010>; /* addrsel1 ??? */
 		};
 
 		gptu@e100a00 { // done
@@ -189,7 +191,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			// pinctrl?
+			pinctrl-0 = <&spi_pins>;
+			pinctrl-names = "default"; 
 
 			status = "disabled";
 		};
@@ -202,67 +205,72 @@
 
 			interrupt-parent = <&icu0>;
 
-			state_default: pinmux {
+			// need to look at these mux groups 
+			exin_pins: exin {
+				mux {
+					lantiq,groups = "exin3";
+					lantiq,function = "exin";
+					lantiq,pull = <2>;
+				};
+			};
 
-				// most likely good like this
-				mdio_pins: mdio {
-					lantiq,groups = "mdio"; // io42 & io43
+			mdio_pins: mdio {
+				mux { //gpio 42 and 43
+					lantiq,groups = "mdio";
 					lantiq,function = "mdio";
 				};
+			};
 
-				nand_pins: nand {
-					output_pins { // gpio's 24 13 49
-					lantiq,groups = "nand cle",
-						"nand ale",
-							"nand rd";
-							lantiq,function = "ebu";
-
-							lantiq,output = <1>;
-							lantiq,open-drain = <0>;
-							lantiq,pull = <0>;
-					};
-
-					input_pins {
-						lantiq,groups = "nand rdy"; // gpio48
-						lantiq,function = "ebu";
-
-						lantiq,output = <0>;
-						lantiq,pull = <2>;
-					};
+			nand_pins: nand {
+				output_pins { // gpio's 24 13 49
+					lantiq,groups = "nand cle", "nand ale", "nand rd";
+					lantiq,function = "ebu";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
 				};
 
-				nand_cs1_pins: nand-cs1 {
-					mux {
-						lantiq,groups = "nand cs1";
-						lantiq,function = "ebu";
-						lantiq,open-drain = <0>;
-						lantiq,pull = <0>;
-					};
+				input_pins {
+					lantiq,groups = "nand rdy"; // gpio48
+					lantiq,function = "ebu";
+					lantiq,pull = <2>;
+				};
+			};
+
+			nand_cs1_pins: nand-cs1 {
+				mux {
+					lantiq,groups = "nand cs1"; // gpio 23
+					lantiq,function = "ebu";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
+			};
+
+			spi_pins: spi {
+				input_pins {
+					lantiq,groups = "spi_di"; // gpio 16
+					lantiq,function = "spi";
+					lantiq,pull = <2>;
 				};
 
-				spi_pins: spi {
-					input_pins {
-						lantiq,groups = "spi_di";
-						lantiq,function = "spi";
-						lantiq,pull = <2>;
-					};
-
-					output_pins {
-						lantiq,pins = "spi_do", "spi_clk", "spi_cs1", "spi_cs3";
-						lantiq,function = "spi";
-						lantiq,open-drain = <0>;
-						lantiq,pull = <0>;
-						lantiq,output = <1>;
-					};
+				output_pins { // gpio 17 18 15 13
+					lantiq,pins = "spi_do", "spi_clk", "spi_cs1"; //, "spi_cs3";
+					lantiq,function = "spi";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
 				};
 			};
 
 			stp_pins: stp {
-				lantiq,groups = "stp";
-				lantiq,function = "stp";
-				lantiq,pull = <0>;
-				lantiq,open-drain = <0>;
-				lantiq,output = <1>;
+				mux { // gpio 4 5 6
+					lantiq,groups = "stp";
+					lantiq,function = "stp";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
 			};
 		};
 
@@ -272,20 +280,27 @@
 			#gpio-cells = <2>;
 			gpio-controller;
 
+			pinctrl-0 = <&stp_pins>;
+			pinctrl-names = "default";
+
 			// look into dsl and values for lantiq,phyX
-			lantiq,shadow = <0xffff>;
+			lantiq,shadow = <0xffffff>; // changed from 4 f to 6 f
 			lantiq,groups = <0x07>;
-			lantiq,phy1 = <0x03>;
-			lantiq,phy2 = <0x03>;
-			lantiq,phy3 = <0x03>;
-			lantiq,phy4 = <0x03>;
+			// 0x1 and 0x3 both let the left led light up when
+			// a cable is inserted
+			lantiq,phy1 = <0x00>;
+			lantiq,phy2 = <0x00>;
+			lantiq,phy3 = <0x00>;
+			lantiq,phy4 = <0x00>;
 		};
 
 		asc1: serial@e100c00 { // done
 			compatible = "lantiq,asc";
 			reg = <0xe100c00 0x400>;
-			interrupt-parent = <&icu0>;
+
 			interrupts = <112 113 114>;
+			interrupt-names = "tx", "rx", "err";
+			interrupt-parent = <&icu0>;
 		};
 
 		dma@e104100 { // done
@@ -306,13 +321,15 @@
 			status = "disabled";
 			compatible = "lantiq,xrx300-usb";
 			reg = <0xe101000 0x1000
-						0xe120000 0x3f000>;
+			       0xe120000 0x3f000>;
 			interrupt-parent = <&icu0>;
 			interrupts = <62 91>;
 			dr_mode = "host";
 			phys = <&usb_phy0>;
 			phy-names = "usb2-phy";
+			// #phy-cells = ?
 
+			// do we need this port node?
 			ehci_port1: port@1 {
 				reg = <1>;
 				#trigger-source-cells = <0>;
@@ -325,7 +342,7 @@
 			status = "disabled";
 			compatible = "lantiq,xrx300-usb";
 			reg = <0xe106000 0x1000
-						0xe1e0000 0x3f000>;
+						0xe1e0000 0x3f000>; // is the second register needed on usb1? also has an interrupt less.
 			interrupt-parent = <&icu0>;
 			interrupts = <91>;
 			dr_mode = "host";
@@ -343,8 +360,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0xe108000 0x3000>,	/* switch */
-						<0xe10b100 0x70>,		/* mdio */
-						<0xe10b1d8 0x30>;		/* mii */
+			      <0xe10b100 0x70>,		/* mdio */
+			      <0xe10b1d8 0x30>;		/* mii */
 			reg-names = "switch", "mdio", "mii";
 			dsa,member = <0 0>;
 
@@ -354,9 +371,11 @@
 
 				port@6 {
 					reg = <0x6>;
+					label = "cpu";
 					phy-mode = "internal";
 					ethernet = <&eth0>;
 
+					// is this needed for the cpu port?
 					fixed-link {
 						speed = <1000>;
 						full-duplex;
@@ -367,7 +386,7 @@
 			gswip_mdio: mdio {
 				#address-cells = <1>;
 				#size-cells = <0>;
-				compatible = "latiq,xrx200-mdio";
+				compatible = "lantiq,xrx200-mdio";
 			};
 
 			gphy-fw {
@@ -384,28 +403,28 @@
 				gphy0: gphy@20 {
 					reg = <0x20>;
 
-					resets = <&reset0 31 30>;
-					reset-names = "gphy";
+					resets = <&reset0 31 30>, <&reset1 6 6>;
+					reset-names = "gphy", "gphy2";
 				};
 
 				gphy1: gphy@58 {
 					reg = <0x58>;
 
-					resets = <&reset0 29 28>;
-					reset-names = "gphy";
+					resets = <&reset0 29 28>, <&reset1 7 7>;
+					reset-names = "gphy", "gphy2";
 				};
 
 				gphy2: gphy@ac {
 					reg = <0xac>;
 
-					resets = <&reset0 28 13>;
-					reset-names = "gphy";
+					resets = <&reset0 28 13>, <&reset1 8 8>;
+					reset-names = "gphy", "gphy2";
 				};
 
 				gphy3: gphy@264 {
 					reg = <0x264>;
 
-					resets = <&reset0 10 10>;
+					resets = <&reset0 10 10>; // do we need a second reset line here?
 					reset-names = "gphy";
 				};
 			};
@@ -421,6 +440,8 @@
 			reset-names = "switch", "ppe", "ppe_dsp";
 			#adderss-cells = <1>;
 			#size-cells = <0>;
+			// lantiq,tx-burst-length = ?
+			// lantiq,rx-burst-length = ?
 
 			fixed-link {
 				speed = <1000>;
