@@ -79,6 +79,11 @@
 	phy4: ethernet-phy@4 {
 		reg = <0x04>;
 	};
+
+	// ar8035 external phy
+	phy7: ethernet-phy@7 {
+		reg = <0x07>;
+	};
 };
 
 /*
@@ -113,6 +118,13 @@
 		label = "port4";
 		phy-mode = "internal";
 		phy-handle = <&phy2>;
+	};
+
+	port@5 {
+		reg = <5>;
+		label = "port5";
+		phy-mode = "rgmii";
+		phy-handle = <&phy7>;
 	};
 };
 
