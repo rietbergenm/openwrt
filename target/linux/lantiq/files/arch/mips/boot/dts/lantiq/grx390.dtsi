@@ -303,8 +303,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			pinctrl-0 = <&spi_pins>, <&spi_cs4_pins>;
-			pinctrl-names = "default"; 
+			//pinctrl-0 = <&spi_pins>, <&spi_cs4_pins>;
+			//pinctrl-names = "default"; 
 
 			status = "disabled";
 		};
@@ -324,10 +324,10 @@
 			lantiq,groups = <0x07>;
 			// 0x1 and 0x3 both let the left led light up when
 			// a cable is inserted
-			lantiq,phy1 = <0x02>;
-			lantiq,phy2 = <0x02>;
-			lantiq,phy3 = <0x02>;
-			lantiq,phy4 = <0x02>;
+			lantiq,phy1 = <0x00>;
+			lantiq,phy2 = <0x00>;
+			lantiq,phy3 = <0x00>;
+			lantiq,phy4 = <0x00>;
 		};
 
 		asc1: serial@e100c00 { // done
