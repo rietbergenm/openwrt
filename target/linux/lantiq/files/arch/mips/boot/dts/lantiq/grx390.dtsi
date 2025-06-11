@@ -66,6 +66,9 @@
 
 		// these three are core platform devices which the kernel checks for
 		// if not present, the kernel panics
+
+		// External Interrupt Unit?
+		// should this have the exin pins?
 		eiu@101000 {
 			#interrupt-cells = <1>;
 			interrupt-controller;
@@ -86,7 +89,7 @@
 			reg = <0x103000 0x1000>;
 			// might have to add lantiq,phy_clk_src later for gphy
 		};
-		
+
 		dcdc@106a00 { // good
 			compatible = "lantiq,dcdc-xrx200";
 			reg = <0x106a00 0x200>;
@@ -187,6 +190,15 @@
 		};
 		*/
 
+
+		// External Bus Unit; related to nand; not sure if confured right
+		ebu0: ebu@6000000 {
+			compatible = "lantiq,ebu-xway";
+			reg = <0x6000000 0x100 0x6000100 0x100>; // why two, not seen before
+			reg-names = "ebunand_reg", "hsnand_reg";
+		};
+
+
 		// General Purpose Timer Unit?
 		gptu@e100a00 { // done
 			compatible = "lantiq,gptu-xway";
@@ -254,11 +266,19 @@
 					lantiq,pull = <2>;
 				};
 
-				output_pins { // gpio 17 18 15 13
-					lantiq,pins = "spi_do", "spi_clk", "spi_cs1"; //, "spi_cs3";
+				output_pins { // gpio 17 18
+					lantiq,groups = "spi_do", "spi_clk";
 					lantiq,function = "spi";
 					lantiq,open-drain = <0>;
 					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
+			};
+
+			spi_cs4_pins: spi-cs4 {
+				mux {
+					lantiq,groups = "spi_cs4";
+					lantiq,function = "spi";
 					lantiq,output = <1>;
 				};
 			};
@@ -283,7 +303,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			pinctrl-0 = <&spi_pins>;
+			pinctrl-0 = <&spi_pins>, <&spi_cs4_pins>;
 			pinctrl-names = "default"; 
 
 			status = "disabled";
@@ -322,13 +342,6 @@
 		dma@e104100 { // done
 			compatible = "lantiq,dma-xway";
 			reg = <0xe104100 0x800>;
-		};
-
-		// External Bus Unit; related to nand; not sure if confured right
-		ebu0: ebu@6000000 {
-			compatible = "lantiq,ebu-xway";
-			reg = <0x6000000 0x100 0x6000100 0x100>; // why two, not seen before
-			reg-names = "ebunand_reg", "hsnand_reg";
 		};
 
 		usb0: usb@e101000 {
