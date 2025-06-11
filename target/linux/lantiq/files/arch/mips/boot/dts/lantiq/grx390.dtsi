@@ -303,8 +303,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			//pinctrl-0 = <&spi_pins>, <&spi_cs4_pins>;
-			//pinctrl-names = "default"; 
+			pinctrl-0 = <&spi_pins>, <&spi_cs4_pins>;
+			pinctrl-names = "default";
 
 			status = "disabled";
 		};

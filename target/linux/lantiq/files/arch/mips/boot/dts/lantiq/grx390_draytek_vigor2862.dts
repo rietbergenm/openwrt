@@ -137,7 +137,7 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		//lantiq,cs = <1>;
+		lantiq,cs = <1>;
 
 		pinctrl-0 = <&nand_pins>, <&nand_cs1_pins>;
 		pinctrl-names = "default";
@@ -200,7 +200,7 @@
 &spi {
 	status = "okay";
 
-	m25p80@1 { 
+	m25p80@4 {
 		#address-cells = <1>;
 		#size-cells = <1>;
 		compatible = "jedec,spi-nor";
