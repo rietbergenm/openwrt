@@ -94,35 +94,35 @@
 &gswip_ports {
 	port@1 {
 		reg = <1>;
-		label = "port1";
+		label = "lan4";
 		phy-mode = "internal";
 		phy-handle = <&phy3>;
 	};
 
 	port@2 {
 		reg = <2>;
-		label = "port2";
+		label = "lan1";
 		phy-mode = "internal";
 		phy-handle = <&phy1>;
 	};
 
 	port@3 {
 		reg = <3>;
-		label = "port3";
+		label = "lan2";
 		phy-mode = "internal";
 		phy-handle = <&phy4>;
 	};
 
 	port@4 {
 		reg = <4>;
-		label = "port4";
+		label = "lan3";
 		phy-mode = "internal";
 		phy-handle = <&phy2>;
 	};
 
 	port@5 {
 		reg = <5>;
-		label = "port5";
+		label = "wan";
 		phy-mode = "rgmii";
 		phy-handle = <&phy7>;
 	};
