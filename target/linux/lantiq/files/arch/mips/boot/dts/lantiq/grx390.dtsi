@@ -321,7 +321,7 @@
 
 			// look into dsl and values for lantiq,phyX
 			lantiq,shadow = <0xffffff>; // changed from 4 f to 6 f
-			lantiq,groups = <0x00>;
+			lantiq,groups = <0x7>;
 			// 0x1 and 0x3 both let the left led light up when
 			// a cable is inserted
 			lantiq,dsl = <0x00>;
