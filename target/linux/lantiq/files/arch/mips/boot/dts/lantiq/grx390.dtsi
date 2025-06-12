@@ -325,9 +325,9 @@
 			// 0x1 and 0x3 both let the left led light up when
 			// a cable is inserted
 			lantiq,dsl = <0x03>;
-			lantiq,phy1 = <0x07>;
-			lantiq,phy2 = <0x07>;
-			lantiq,phy3 = <0x07>;
+			lantiq,phy1 = <0x03>;
+			lantiq,phy2 = <0x05>;
+			lantiq,phy3 = <0x06>;
 			lantiq,phy4 = <0x07>;
 		};
 
