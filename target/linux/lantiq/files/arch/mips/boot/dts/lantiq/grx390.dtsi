@@ -324,11 +324,11 @@
 			lantiq,groups = <0x7>;
 			// 0x1 and 0x3 both let the left led light up when
 			// a cable is inserted
-			lantiq,dsl = <0x00>;
-			lantiq,phy1 = <0x00>;
-			lantiq,phy2 = <0x00>;
-			lantiq,phy3 = <0x00>;
-			lantiq,phy4 = <0x00>;
+			lantiq,dsl = <0x03>;
+			lantiq,phy1 = <0x07>;
+			lantiq,phy2 = <0x07>;
+			lantiq,phy3 = <0x07>;
+			lantiq,phy4 = <0x07>;
 		};
 
 		asc1: serial@e100c00 { // done
