@@ -22,6 +22,7 @@ lantiq_setup_interfaces()
 	avm,fritz5490|\
 	avm,fritz5490-micron|\
 	bt,homehub-v5a|\
+	draytek,vigor2862|\
 	lantiq,easy80920-nand|\
 	lantiq,easy80920-nor|\
 	zyxel,p-2812hnu-f1|\
