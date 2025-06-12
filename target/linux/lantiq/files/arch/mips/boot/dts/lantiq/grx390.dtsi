@@ -359,7 +359,6 @@
 			phy-names = "usb2-phy";
 			// #phy-cells = ?
 
-			// do we need this port node?
 			ehci_port1: port@1 {
 				reg = <1>;
 				#trigger-source-cells = <0>;
