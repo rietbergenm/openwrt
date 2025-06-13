@@ -266,6 +266,24 @@
 		nand-on-flash-bbt;
 
 		// ecc?
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@100000 {
+				reg = <0x100000 0x4000>;
+				label = "u-boot-env";
+				read-only;
+			};
+
+			partition@140000 {
+				reg = <0x140000 0x4000>;
+				label = "u-boot-env-bak";
+				read-only;
+			};
+		};
 	};
 };
 
@@ -286,6 +304,18 @@
 			compatible = "fixed-partitions";
 			#address-cells = <1>;
 			#size-cells = <1>;
+
+			partition@0 {
+				reg = <0x00 0x5000>;
+				label = "DrayBoot (u-boot)";
+				read-only;
+			};
+
+			partition@5000 {
+				reg = <0x5000 0x2c000>;
+				label = "gphy-firmware";
+				read-only;
+			};
 		};
 	};
 };
