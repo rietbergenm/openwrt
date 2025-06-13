@@ -1,0 +1,483 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "lantiq,xway", "lantiq,grx390";
+
+	aliases {
+		serial0 = &asc1;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	// two cores show up regardless of how many we configure here
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu@0 {
+			compatible = "mips,mips34Kc";
+			reg = <0>;
+		};
+
+		cpu@1 {
+			compatible = "mips,mips34Kc";
+			reg = <1>;
+		};
+	};
+
+	biu@1f800000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "lantiq,biu", "simple-bus";
+		reg = <0x1f800000 0x800000>;
+		ranges = <0x00 0x1f800000 0x7fffff>;
+
+		icu0: icu0@80200 {
+			/*
+			 * merged the two seperate icu nodes into
+			 * one and merged all the smaller register maps into
+			 * two big ones, 1 for each icu. It is the same way on vr9.
+			 */
+			#interrupt-cells = <1>;
+			interrupt-controller;
+			compatible = "lantiq,icu";
+			reg = <0x80200 0xc8   /* icu0 */
+			       0x80300 0xc8>; /* icu1 */
+		};
+
+		watchdog@803f0 {
+			compatible = "lantiq,xrx100-wdt", "lantiq,wdt";
+			reg = <0x803f0 0x10>;
+
+			regmap = <&rcu0>;
+		};
+	};
+
+	sram: sram@1f000000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "lantiq,sram", "simple-bus";
+		reg = <0x1f000000 0x800000>;
+		ranges = <0x00 0x1f000000 0x7fffff>;
+
+		// these three are core platform devices which the kernel checks for
+		// if not present, the kernel panics
+
+		// External Interrupt Unit?
+		// should this have the exin pins?
+		eiu@101000 {
+			#interrupt-cells = <1>;
+			interrupt-controller;
+			compatible = "lantiq,eiu-xway";
+			reg = <0x101000 0x1000>;
+			interrupt-parent = <&icu0>;
+			lantiq,eiu-irqs = <166 135 66 40 41 42>;
+		};
+
+		// Power Management Unit?
+		pmu@102000 { 
+			compatible = "lantiq,pmu-xway";
+			reg = <0x102000 0x1000>;
+		};
+
+		cgu@103000 {
+			compatible = "lantiq,cgu-xway";
+			reg = <0x103000 0x1000>;
+			// might have to add lantiq,phy_clk_src later for gphy
+		};
+
+		dcdc@106a00 { // good
+			compatible = "lantiq,dcdc-xrx200";
+			reg = <0x106a00 0x200>;
+		};
+
+		/* there might be a way to initialize this rcu via the fpi
+		 * bus driver; lantiq,rcu property does some initialization
+		 *
+		 * also note that the lantiq,xrx200-rcu string has no kernel
+		 * driver looking for it, effectively this uses the simple-mfd
+		 * or syscon driver.
+		 */
+		rcu0: rcu@203000 {
+			compatible = "lantiq,xrx200-rcu", "simple-mfd", "syscon";
+			reg = <0x203000 0x1000>;
+			ranges = <0x0 0x203000 0x100>;
+			big-endian;
+
+			reset0: reset-controller@10 {
+				compatible = "lantiq,xrx200-reset";
+				reg = <0x10 4>, <0x14 4>;
+				reg-names = "reset", "status";
+
+				#reset-cells = <2>;
+			};
+
+			reset1: reset-controller@48 {
+				compatible = "lantiq,xrx200-reset";
+				reg = <0x48 4>, <0x24 4>;
+				reg-names = "reset", "status";
+
+				#reset-cells = <2>;
+			};
+
+			// xrx300 and xrx200 do the same
+			usb_phy0: usb2-phy@18 {
+				compatible = "lantiq,xrx300-usb2-phy";
+				reg = <0x18 4>, <0x38 4>;
+				status = "disabled";
+
+				resets = <&reset1 4 4>, <&reset0 4 4>;
+				reset-names = "phy", "ctrl";
+				#phy-cells = <0>;
+			};
+
+			usb_phy1: usb2-phy@34 {
+				compatible = "lantiq,xrx300-usb2-phy";
+				reg = <0x34 4>, <0x3c 4>;
+				status = "disabled";
+
+				resets = <&reset1 5 4>, <&reset0 4 4>;
+				reset-names = "phy", "ctrl";
+				#phy-cells = <0>;
+			};
+
+			reboot@10 {
+				compatible = "syscon-reboot";
+				offset = <0x10>;
+				mask = <0xe0000000>;
+				
+				// do we need more; like regmap?
+			};
+		};
+	};
+
+	/* 
+	 * may need work? only vr9 uses lantiq,xrx200-fpi, the
+	 * others use lantiq,fpi
+	 */
+
+	fpi: fpi@10000000 {
+		compatible = "lantiq,xrx200-fpi", "simple-bus";
+		ranges = <0x0 0x10000000 0xf000000>; // are these correct?
+		reg = <0x1f400000 0x1000>,
+            <0x10000000 0xf000000>; // are these correct?
+		lantiq,rcu = <&rcu0>;
+		lantiq,offset-endianness = <0x4c>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		localbus: localbus@0 {
+			compatible = "lantiq,localbus", "simple-bus";
+			#address-cells = <2>;
+			#size-cells = <1>;
+			/*
+			 * copied this from ar9/vr9/xrx330/everything else
+			 * that seems to have the same.
+			 */
+			ranges = <0 0 0x00 0x3ffffff   /* addrsel0 ??? */
+			          1 0 0x4000000 0x4000010>; /* addrsel1 ??? */
+		};
+
+		/* what is this and what to do with it?
+		 * seems to be some gpio controller of sorts that
+		 * supports spi and uart?
+		 * more info in the pinctrl driver/dt-bindings
+		 *
+		 * Universal Serial InterFace?
+		usif@1da00000 {
+
+		};
+		*/
+
+
+		// External Bus Unit; related to nand; not sure if confured right
+		ebu0: ebu@6000000 {
+			compatible = "lantiq,ebu-xway";
+			reg = <0x6000000 0x100 0x6000100 0x100>; // why two, not seen before
+			reg-names = "ebunand_reg", "hsnand_reg";
+		};
+
+
+		// General Purpose Timer Unit?
+		gptu@e100a00 { // done
+			compatible = "lantiq,gptu-xway";
+			reg = <0xe100a00 0x100>;
+			interrupt-parent = <&icu0>;
+			interrupts = <126 127 128 129 130 131>;
+		};
+
+		
+		gpio: pinmux@e100b10 {
+			compatible = "lantiq,xrx300-pinctrl";
+			#gpio-cells = <2>;
+			gpio-controller;
+			reg = <0xe100b10 0xa0>;
+
+			interrupt-parent = <&icu0>;
+
+			// need to look at these mux groups 
+			// EXternal INterrupt
+			exin_pins: exin {
+				mux {
+					lantiq,groups = "exin3";
+					lantiq,function = "exin";
+					lantiq,pull = <2>;
+				};
+			};
+
+			mdio_pins: mdio { // works
+				mux { //gpio 42 and 43
+					lantiq,groups = "mdio";
+					lantiq,function = "mdio";
+				};
+			};
+
+			nand_pins: nand {
+				output_pins { // gpio's 24 13 49
+					lantiq,groups = "nand cle", "nand ale", "nand rd";
+					lantiq,function = "ebu";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
+
+				input_pins {
+					lantiq,groups = "nand rdy"; // gpio48
+					lantiq,function = "ebu";
+					lantiq,pull = <2>;
+				};
+			};
+
+			nand_cs1_pins: nand-cs1 {
+				mux {
+					lantiq,groups = "nand cs1"; // gpio 23
+					lantiq,function = "ebu";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
+			};
+
+			spi_pins: spi {
+				input_pins {
+					lantiq,groups = "spi_di"; // gpio 16
+					lantiq,function = "spi";
+					lantiq,pull = <2>;
+				};
+
+				output_pins { // gpio 17 18
+					lantiq,groups = "spi_do", "spi_clk";
+					lantiq,function = "spi";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
+			};
+
+			spi_cs4_pins: spi-cs4 {
+				mux {
+					lantiq,groups = "spi_cs4";
+					lantiq,function = "spi";
+					lantiq,output = <1>;
+				};
+			};
+
+			stp_pins: stp { // works
+				mux { // gpio 4 5 6
+					lantiq,groups = "stp";
+					lantiq,function = "stp";
+					lantiq,open-drain = <0>;
+					lantiq,pull = <0>;
+					lantiq,output = <1>;
+				};
+			};
+		};
+
+		spi: spi@e100800 {
+			compatible = "lantiq,xrx200-spi", "lantiq,xrx100-spi";
+			reg = <0xe100800 0x100>;
+			interrupt-parent = <&icu0>;
+			interrupts = <22 23 24>;
+			interrupt-names = "spi_rx", "spi_tx", "spi_err";
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			pinctrl-0 = <&spi_pins>, <&spi_cs4_pins>;
+			pinctrl-names = "default";
+
+			status = "disabled";
+		};
+
+
+		stp: stp@e100bb0 {
+			compatible = "lantiq,gpio-stp-xway";
+			reg = <0xe100bb0 0x40>;
+			#gpio-cells = <2>;
+			gpio-controller;
+
+			pinctrl-0 = <&stp_pins>;
+			pinctrl-names = "default";
+
+			lantiq,shadow = <0xffffff>;
+			lantiq,groups = <0x7>;
+			lantiq,dsl = <0x00>;
+			lantiq,phy1 = <0x00>;
+			lantiq,phy2 = <0x00>;
+			lantiq,phy3 = <0x00>;
+			lantiq,phy4 = <0x00>;
+
+			status = "disabled";
+		};
+
+		asc1: serial@e100c00 { // done
+			compatible = "lantiq,asc";
+			reg = <0xe100c00 0x400>;
+
+			interrupts = <112 113 114>;
+			interrupt-names = "tx", "rx", "err";
+			interrupt-parent = <&icu0>;
+		};
+
+		dma@e104100 { // done
+			compatible = "lantiq,dma-xway";
+			reg = <0xe104100 0x800>;
+		};
+
+		usb0: usb@e101000 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+			compatible = "lantiq,xrx300-usb";
+			reg = <0xe101000 0x1000
+			       0xe120000 0x3f000>;
+			interrupt-parent = <&icu0>;
+			interrupts = <62 91>;
+			dr_mode = "host";
+			phys = <&usb_phy0>;
+			phy-names = "usb2-phy";
+			// #phy-cells = ?
+
+			ehci_port1: port@1 {
+				reg = <1>;
+				#trigger-source-cells = <0>;
+			};
+		};
+
+		usb1: usb@e106000 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+			compatible = "lantiq,xrx300-usb";
+			reg = <0xe106000 0x1000
+						0xe1e0000 0x3f000>; // is the second register needed on usb1? also has an interrupt less.
+			interrupt-parent = <&icu0>;
+			interrupts = <91>;
+			dr_mode = "host";
+			phys = <&usb_phy1>;
+			phy-names = "usb2-phy";
+
+			ehci_port2: port@1 {
+				reg = <1>;
+				#trigger-source-cells = <0>;
+			};
+		};
+
+		gswip: switch@e108000 {
+			compatible = "lantiq,xrx330-gswip";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0xe108000 0x3000>,	/* switch */
+			      <0xe10b100 0x70>,		/* mdio */
+			      <0xe10b1d8 0x30>;		/* mii */
+			reg-names = "switch", "mdio", "mii";
+			dsa,member = <0 0>;
+
+			gswip_ports: ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@6 {
+					reg = <0x6>;
+					label = "cpu";
+					phy-mode = "internal";
+					ethernet = <&eth0>;
+
+					// is this needed for the cpu port?
+					fixed-link {
+						speed = <1000>;
+						full-duplex;
+					};
+				};
+			};
+
+			gswip_mdio: mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				compatible = "lantiq,xrx200-mdio";
+			};
+
+			gphy-fw {
+				compatible = "lantiq,xrx330-gphy-fw", "lantiq,gphy-fw";
+				lantiq,rcu = <&rcu0>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				/*
+				 * found out the registers and reset specs
+				 * from gpl dump of telekom router
+				 * uboot was very readable and switch_api also helped.
+				 */
+				gphy0: gphy@20 {
+					reg = <0x20>;
+
+					resets = <&reset0 31 30>, <&reset1 6 6>;
+					reset-names = "gphy", "gphy2";
+				};
+
+				gphy1: gphy@58 {
+					reg = <0x58>;
+
+					resets = <&reset0 29 28>, <&reset1 7 7>;
+					reset-names = "gphy", "gphy2";
+				};
+
+				gphy2: gphy@ac {
+					reg = <0xac>;
+
+					resets = <&reset0 28 13>, <&reset1 8 8>;
+					reset-names = "gphy", "gphy2";
+				};
+
+				gphy3: gphy@264 {
+					reg = <0x264>;
+
+					resets = <&reset0 10 10>; // do we need a second reset line here?
+					reset-names = "gphy";
+				};
+			};
+		};
+
+		eth0: eth@e10b308 { // address is correct (ar10.h)
+			compatible = "lantiq,xrx200-net";
+			reg = <0xe10b308 0x30>; /* pmac */
+			interrupt-parent = <&icu0>;
+			interrupts = <73>, <72>;
+			interrupt-names = "tx", "rx";
+			resets = <&reset0 21 16>, <&reset0 8 8>, <&reset0 3 3>;
+			reset-names = "switch", "ppe", "ppe_dsp";
+			#adderss-cells = <1>;
+			#size-cells = <0>;
+			// lantiq,tx-burst-length = ?
+			// lantiq,rx-burst-length = ?
+
+			fixed-link {
+				speed = <1000>;
+				full-duplex;
+			};
+		};
+	};
+};

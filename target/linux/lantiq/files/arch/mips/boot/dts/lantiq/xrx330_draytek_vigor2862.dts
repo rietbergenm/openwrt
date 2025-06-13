@@ -1,0 +1,345 @@
+#include "xrx330.dtsi"
+#include <dt-bindings/mips/lantiq_rcu_gphy.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	compatible = "draytek,vigor2862", "lantiq,xway", "lantiq,grx390";
+	model = "Draytek Vigor2862";
+
+	aliases {
+		led-boot = &led_act;
+		led-failsafe = &led_act;
+		led-running = &led_act;
+		led-upgrade = &led_act;
+
+		led-dsl = &led_dsl;
+		led-internet = &led_wan;
+	};
+
+	chosen {
+		bootargs = "console=ttyLTQ0,115200";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00 0x10000000>;
+	};
+
+	keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <100>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+
+		// button functions, but hidden behind the plastic cover
+		wps {
+			label = "wps";
+			gpios = <&gpio 9 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WPS_BUTTON>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		dmz {
+			label = "green:dmz";
+			gpios = <&stp 13 GPIO_ACTIVE_LOW>;
+		};
+
+		wcf {
+			label = "green:wcf";
+			gpios = <&stp 14 GPIO_ACTIVE_LOW>;
+		};
+
+		qos {
+			label = "green:qos";
+			gpios = <&stp 15 GPIO_ACTIVE_LOW>;
+		};
+
+		vpn {
+			label = "green:vpn";
+			gpios = <&stp 16 GPIO_ACTIVE_LOW>;
+		};
+
+		led_dsl: dsl {
+			label = "green:dsl";
+			gpios = <&stp 19 GPIO_ACTIVE_LOW>;
+		};
+
+		led_wan: wan2 {
+			label = "green:wan2";
+			gpios = <&stp 20 GPIO_ACTIVE_LOW>;
+		};
+
+		led_usb1: usb1 {
+			label = "green:usb1";
+			gpios = <&stp 21 GPIO_ACTIVE_LOW>;
+			trigger-sources = <&ehci_port1>;
+			linux,default-trigger = "usbport";
+		};
+
+		led_usb2: usb2 {
+			label = "green:usb2";
+			gpios = <&stp 22 GPIO_ACTIVE_LOW>;
+			trigger-sources = <&ehci_port2>;
+			linux,default-trigger = "usbport";
+		};
+
+		led_act: act {
+			label = "green:act";
+			gpios = <&stp 23 GPIO_ACTIVE_LOW>;
+		};
+
+
+		// should we call these act/link instead of left/right?
+		lan1-left {
+			label = "green:lan1:left";
+			gpios = <&stp 8 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan1-right {
+			label = "green:lan1:right";
+			gpios = <&stp 9 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan2-left {
+			label = "green:lan2:left";
+			gpios = <&stp 5 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan2-right {
+			label = "green:lan2:right";
+			gpios = <&stp 6 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan3-left {
+			label = "green:lan3:left";
+			gpios = <&stp 2 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan3-right {
+			label = "green:lan3:right";
+			gpios = <&stp 3 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan4-left {
+			label = "green:lan4:left";
+			gpios = <&stp 17 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan4-right {
+			label = "green:lan4:right";
+			gpios = <&stp 18 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	usb0_vbus: regulator-usb0-vbus {
+		compatible = "regulator-fixed";
+
+		regulator-name = "USB0_VBUS";
+
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+
+		gpios = <&stp 4 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
+	usb1_vbus: regulator-usb1-vbus {
+		compatible = "regulator-fixed";
+		regulator-name = "USB1_VBUS";
+
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+
+		gpios = <&stp 7 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+};
+
+&gphy0 {
+	lantiq,gphy-mode = <GPHY_MODE_GE>;
+};
+
+&gphy1 {
+	lantiq,gphy-mode = <GPHY_MODE_GE>;
+};
+
+&gphy2 {
+	lantiq,gphy-mode = <GPHY_MODE_GE>;
+};
+
+&gphy3 {
+	lantiq,gphy-mode = <GPHY_MODE_GE>;
+};
+
+
+&gswip {
+	pinctrl-0 = <&mdio_pins>;
+	pinctrl-names = "default";
+};
+
+
+&gswip_mdio {
+	phy1: ethernet-phy@1 {
+		reg = <0x01>;
+	};
+
+	phy2: ethernet-phy@2 {
+		reg = <0x02>;
+	};
+
+	phy3: ethernet-phy@3 {
+		reg = <0x03>;
+	};
+
+	phy4: ethernet-phy@4 {
+		reg = <0x04>;
+	};
+
+	// ar8035 external phy
+	phy7: ethernet-phy@7 {
+		reg = <0x07>;
+	};
+};
+
+/*
+ * port 1 2 3 4 6 are internal;
+ * 0 can do all types of rgmii in addition to rmii and gmii;
+ * 5 can do all types of rgmii in addition to rmii and internal;
+ */
+&gswip_ports {
+	port@1 {
+		reg = <1>;
+		label = "lan4";
+		phy-mode = "internal";
+		phy-handle = <&phy3>;
+	};
+
+	port@2 {
+		reg = <2>;
+		label = "lan1";
+		phy-mode = "internal";
+		phy-handle = <&phy1>;
+	};
+
+	port@3 {
+		reg = <3>;
+		label = "lan2";
+		phy-mode = "internal";
+		phy-handle = <&phy4>;
+	};
+
+	port@4 {
+		reg = <4>;
+		label = "lan3";
+		phy-mode = "internal";
+		phy-handle = <&phy2>;
+	};
+
+	port@5 {
+		reg = <5>;
+		label = "wan";
+		phy-mode = "rgmii";
+		phy-handle = <&phy7>;
+	};
+};
+
+&localbus {
+	// not fully working yet, partitions don't show up
+	nand@1 {
+		compatible = "lantiq,nand-xway";
+		bank-width = <2>;
+		reg = <1 0x0 0x2000000>;
+
+		lantiq,cs = <1>;
+
+		pinctrl-0 = <&nand_pins>, <&nand_cs1_pins>;
+		pinctrl-names = "default";
+
+		nand-on-flash-bbt;
+
+		// ecc?
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@100000 {
+				reg = <0x100000 0x4000>;
+				label = "u-boot-env";
+				read-only;
+			};
+
+			partition@140000 {
+				reg = <0x140000 0x4000>;
+				label = "u-boot-env-bak";
+				read-only;
+			};
+		};
+	};
+};
+
+
+&spi {
+	status = "okay";
+
+	m25p80@4 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <1>;
+		spi-max-frequency = <1000000>; // 1 MHz
+
+		m25,fast-read;
+
+		// pinctrl?
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				reg = <0x00 0x5000>;
+				label = "DrayBoot (u-boot)";
+				read-only;
+			};
+
+			partition@5000 {
+				reg = <0x5000 0x2c000>;
+				label = "gphy-firmware";
+				read-only;
+			};
+		};
+	};
+};
+
+&stp {
+	status = "okay";
+};
+
+&usb_phy0 {
+	status = "okay";
+};
+
+&usb_phy1 {
+	status = "okay";
+};
+
+&usb0 {
+	status = "okay";
+	vbus-supply = <&usb0_vbus>;
+};
+
+&usb1 {
+	status = "okay";
+	vbus-supply = <&usb1_vbus>;
+};
