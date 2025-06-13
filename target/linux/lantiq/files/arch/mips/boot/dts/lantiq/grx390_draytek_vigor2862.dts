@@ -16,6 +16,115 @@
 		reg = <0x00 0x10000000>;
 	};
 
+	keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <100>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+
+		// button functions, but hidden behind the plastic cover
+		wps {
+			label = "wps";
+			gpios = <&gpio 9 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WPS_BUTTON>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		dmz {
+			label = "green:dmz";
+			gpios = <&stp 13 GPIO_ACTIVE_LOW>;
+		};
+
+		wcf {
+			label = "green:wcf";
+			gpios = <&stp 14 GPIO_ACTIVE_LOW>;
+		};
+
+		qos {
+			label = "green:qos";
+			gpios = <&stp 15 GPIO_ACTIVE_LOW>;
+		};
+
+		vpn {
+			label = "green:vpn";
+			gpios = <&stp 16 GPIO_ACTIVE_LOW>;
+		};
+
+		dsl {
+			label = "green:dsl";
+			gpios = <&stp 19 GPIO_ACTIVE_LOW>;
+		};
+
+		wan2 {
+			label = "green:wan2";
+			gpios = <&stp 20 GPIO_ACTIVE_LOW>;
+		};
+
+		usb1 {
+			label = "green:usb1";
+			gpios = <&stp 21 GPIO_ACTIVE_LOW>;
+		};
+
+		usb2 {
+			label = "green:usb2";
+			gpios = <&stp 22 GPIO_ACTIVE_LOW>;
+		};
+
+		act {
+			label = "green:act";
+			gpios = <&stp 23 GPIO_ACTIVE_LOW>;
+		};
+
+
+		// should we call these act/link instead of left/right?
+		lan1-left {
+			label = "green:lan1:left";
+			gpios = <&stp 8 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan1-right {
+			label = "lan1:green:right";
+			gpios = <&stp 9 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan2-left {
+			label = "lan2:green:left";
+			gpios = <&stp 5 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan2-right {
+			label = "lan2:green:right";
+			gpios = <&stp 6 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan3-left {
+			label = "lan3:green:left";
+			gpios = <&stp 2 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan3-right {
+			label = "lan3:green:right";
+			gpios = <&stp 3 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan4-left {
+			label = "lan4:green:left";
+			gpios = <&stp 17 GPIO_ACTIVE_HIGH>;
+		};
+
+		lan4-right {
+			label = "lan4:green:right";
+			gpios = <&stp 18 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	usb0_vbus: regulator-usb0-vbus {
 		compatible = "regulator-fixed";
 
