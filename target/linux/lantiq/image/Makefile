@@ -173,7 +173,6 @@ DEFAULT_SOC := vr9
 include tp-link.mk
 include vr9.mk
 include xrx330.mk
-include grx390.mk
 endif
 
 ifeq ($(SUBTARGET),falcon)
