@@ -90,7 +90,7 @@ lantiq_setup_macs()
 	arcadyan,arv7519rw22)
 		wan_mac=$(macaddr_add "$(mtd_get_mac_binary boardconfig 0x16)" 1)
 		;;
-	draytek,vigor2862|)\
+	draytek,vigor2862|\
 	lantiq,easy80920-nand|\
 	lantiq,easy80920-nor|\
 	zyxel,p-2812hnu-f1|\
