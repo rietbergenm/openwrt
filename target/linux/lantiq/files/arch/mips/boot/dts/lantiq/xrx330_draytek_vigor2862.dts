@@ -7,6 +7,16 @@
 	compatible = "draytek,vigor2862", "lantiq,xway", "lantiq,grx390";
 	model = "Draytek Vigor2862";
 
+	aliases {
+		led-boot = &led_act;
+		led-failsafe = &led_act;
+		led-running = &led_act;
+		led-upgrade = &led_act;
+
+		led-dsl = &led_dsl;
+		led-internet = &led_wan;
+	};
+
 	chosen {
 		bootargs = "console=ttyLTQ0,115200";
 	};
@@ -57,27 +67,31 @@
 			gpios = <&stp 16 GPIO_ACTIVE_LOW>;
 		};
 
-		dsl {
+		led_dsl: dsl {
 			label = "green:dsl";
 			gpios = <&stp 19 GPIO_ACTIVE_LOW>;
 		};
 
-		wan2 {
+		led_wan: wan2 {
 			label = "green:wan2";
 			gpios = <&stp 20 GPIO_ACTIVE_LOW>;
 		};
 
-		usb1 {
+		led_usb1: usb1 {
 			label = "green:usb1";
 			gpios = <&stp 21 GPIO_ACTIVE_LOW>;
+			trigger-sources = <&ehci_port1>;
+			linux,default-trigger = "usbport";
 		};
 
-		usb2 {
+		led_usb2: usb2 {
 			label = "green:usb2";
 			gpios = <&stp 22 GPIO_ACTIVE_LOW>;
+			trigger-sources = <&ehci_port2>;
+			linux,default-trigger = "usbport";
 		};
 
-		act {
+		led_act: act {
 			label = "green:act";
 			gpios = <&stp 23 GPIO_ACTIVE_LOW>;
 		};
