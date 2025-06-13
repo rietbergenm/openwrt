@@ -104,37 +104,37 @@
 		};
 
 		lan1-right {
-			label = "lan1:green:right";
+			label = "green:lan1:right";
 			gpios = <&stp 9 GPIO_ACTIVE_HIGH>;
 		};
 
 		lan2-left {
-			label = "lan2:green:left";
+			label = "green:lan2:left";
 			gpios = <&stp 5 GPIO_ACTIVE_HIGH>;
 		};
 
 		lan2-right {
-			label = "lan2:green:right";
+			label = "green:lan2:right";
 			gpios = <&stp 6 GPIO_ACTIVE_HIGH>;
 		};
 
 		lan3-left {
-			label = "lan3:green:left";
+			label = "green:lan3:left";
 			gpios = <&stp 2 GPIO_ACTIVE_HIGH>;
 		};
 
 		lan3-right {
-			label = "lan3:green:right";
+			label = "green:lan3:right";
 			gpios = <&stp 3 GPIO_ACTIVE_HIGH>;
 		};
 
 		lan4-left {
-			label = "lan4:green:left";
+			label = "green:lan4:left";
 			gpios = <&stp 17 GPIO_ACTIVE_HIGH>;
 		};
 
 		lan4-right {
-			label = "lan4:green:right";
+			label = "green:lan4:right";
 			gpios = <&stp 18 GPIO_ACTIVE_HIGH>;
 		};
 	};
