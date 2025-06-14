@@ -3,6 +3,6 @@ define Device/draytek_vigor2862
   DEVICE_VENDOR := Draytek
   DEVICE_MODEL := Vigor2862
   SOC := xrx330
-  DEVICE_PACKAGES := kmod-usb-dwc2 u-boot-tools
+  DEVICE_PACKAGES := kmod-usb-dwc2 dumpimage lzmadec
 endef
 TARGET_DEVICES += draytek_vigor2862
