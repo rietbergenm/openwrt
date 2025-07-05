@@ -162,8 +162,9 @@
 
 	fpi: fpi@10000000 {
 		compatible = "lantiq,xrx200-fpi", "simple-bus";
-		ranges = <0x00 0x10000000 0xeefffff>; // are these correct?
-		reg = <0x10000000 0xef00000>; // are these correct?
+		ranges = <0x0 0x10000000 0xf000000>; // are these correct?
+		reg = <0x1f400000 0x1000>,
+            <0x10000000 0xf000000>; // are these correct?
 		lantiq,rcu = <&rcu0>;
 		lantiq,offset-endianness = <0x4c>;
 		#address-cells = <1>;
