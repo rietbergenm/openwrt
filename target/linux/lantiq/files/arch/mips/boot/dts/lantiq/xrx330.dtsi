@@ -126,7 +126,7 @@
 
 			// xrx300 and xrx200 do the same
 			usb_phy0: usb2-phy@18 {
-				compatible = "lantiq,xrx200-usb2-phy";
+				compatible = "lantiq,xrx300-usb2-phy";
 				reg = <0x18 4>, <0x38 4>;
 				status = "disabled";
 
@@ -136,7 +136,7 @@
 			};
 
 			usb_phy1: usb2-phy@34 {
-				compatible = "lantiq,xrx200-usb2-phy";
+				compatible = "lantiq,xrx300-usb2-phy";
 				reg = <0x34 4>, <0x3c 4>;
 				status = "disabled";
 
