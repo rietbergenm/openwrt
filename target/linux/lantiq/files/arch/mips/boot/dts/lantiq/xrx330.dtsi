@@ -209,7 +209,7 @@
 
 		
 		gpio: pinmux@e100b10 {
-			compatible = "lantiq,xrx200-pinctrl";
+			compatible = "lantiq,xrx300-pinctrl";
 			#gpio-cells = <2>;
 			gpio-controller;
 			reg = <0xe100b10 0xa0>;
