@@ -69,6 +69,18 @@ define Package/xrx200-rev1.2-phy22f-firmware/install
 	$(call Package/lantiq-gphy-firmware/install,$(1),xrx200_phy22f_a22.bin,xrx200_phy22f_a22.bin)
 endef
 
+define Package/xrx300-phy11g-firmware
+  $(call Package/lantiq-gphy-firmware-defaults, xRx3xx Gigabit Ethernet PHY Firmware)
+endef
+
+define Package/xrx300-phy11g-firmware/description
+  This package contains firmware for Gigabit Ethernet PHY integrated in xRx300/xRx330 SoC.
+endef
+
+define Package/xrx300-phy11g-firmware/install
+	$(call Package/lantiq-gphy-firmware/install,$(1),xrx300_phy11g_a21.bin,xrx300_phy11g_a21.bin)
+endef
+
 define Build/Compile
 endef
 
@@ -76,3 +88,4 @@ $(eval $(call BuildPackage,xrx200-rev1.1-phy11g-firmware))
 $(eval $(call BuildPackage,xrx200-rev1.2-phy11g-firmware))
 $(eval $(call BuildPackage,xrx200-rev1.1-phy22f-firmware))
 $(eval $(call BuildPackage,xrx200-rev1.2-phy22f-firmware))
+$(eval $(call BuildPackage,xrx300-phy11g-firmware))
