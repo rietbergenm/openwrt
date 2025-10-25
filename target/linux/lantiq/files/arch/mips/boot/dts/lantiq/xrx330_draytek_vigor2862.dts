@@ -185,7 +185,7 @@
 	pinctrl-names = "default";
 };
 
-
+// seems like the phy driver might support leds, so use that combined with stp auto driving?
 &gswip_mdio {
 	phy1: ethernet-phy@1 {
 		reg = <0x01>;

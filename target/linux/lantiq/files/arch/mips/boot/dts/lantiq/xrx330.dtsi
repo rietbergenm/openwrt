@@ -151,6 +151,7 @@
 				mask = <0xe0000000>;
 				
 				// do we need more; like regmap?
+				// we probably do
 			};
 		};
 	};
@@ -394,6 +395,7 @@
 			      <0xe10b100 0x70>,		/* mdio */
 			      <0xe10b1d8 0x30>;		/* mii */
 			reg-names = "switch", "mdio", "mii";
+			// standalone switches shouldn't set dsa,member
 			dsa,member = <0 0>;
 
 			gswip_ports: ports {
@@ -403,14 +405,15 @@
 				port@6 {
 					reg = <0x6>;
 					label = "cpu";
-					phy-mode = "internal";
+					//phy-mode = "internal";
 					ethernet = <&eth0>;
 
 					// is this needed for the cpu port?
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-					};
+					// might be causing problems
+					//fixed-link {
+					//	speed = <1000>;
+					//	full-duplex;
+					//};
 				};
 			};
 
