@@ -176,6 +176,10 @@
 	lantiq,gphy-mode = <GPHY_MODE_GE>;
 };
 
+&eth0 {
+	nvmem-cells = <&macaddr 0>;
+	nvmem-cell-names = "mac-address";
+};
 
 &gswip {
 	pinctrl-0 = <&mdio_pins>;
@@ -221,6 +225,9 @@
 		label = "wan";
 		phy-mode = "rgmii-rxid";
 		phy-handle = <&phy7>;
+
+		nvmem-cells = <&macaddr 2>;
+		nvmem-cell-names = "mac-address";
 	};
 
 	port@1 {
@@ -292,16 +299,12 @@
 &spi {
 	status = "okay";
 
-	m25p80@4 {
-		#address-cells = <1>;
-		#size-cells = <1>;
+	flash@4 {
 		compatible = "jedec,spi-nor";
 		reg = <1>;
 		spi-max-frequency = <1000000>; // 1 MHz
 
 		m25,fast-read;
-
-		// pinctrl?
 
 		partitions {
 			compatible = "fixed-partitions";
@@ -310,14 +313,32 @@
 
 			partition@0 {
 				reg = <0x00 0x5000>;
-				label = "DrayBoot (u-boot)";
+				label = "preloader";
 				read-only;
 			};
 
 			partition@5000 {
 				reg = <0x5000 0x2c000>;
-				label = "gphy-firmware";
+				label = "DrayBoot (u-boot)";
 				read-only;
+			};
+
+			partition@31000 {
+				reg = <0x31000 0xf000>;
+				label = "unknown";
+				read-only;
+
+				nvmem-layout {
+					compatible = "fixed-layout";
+					#address-cells = <1>;
+					#size-cells = <1>;
+
+					macaddr: macaddr@eff8 {
+						compatible = "mac-base";
+						reg = <0xeff8 0x6>;
+						#nvmem-cell-cells = <1>;
+					};
+				};
 			};
 		};
 	};
