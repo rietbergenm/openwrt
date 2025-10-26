@@ -65,14 +65,14 @@ buffalo,wbmr-300hpd)
 	ucidef_set_led_default "router" "router" "green:router" "1"
 	;;
 draytek,vigor2862)
-       ucidef_set_led_netdev "lan1l" "LAN1" "green:lan1:left" "lan1" "tx rx"
-       ucidef_set_led_netdev "lan1r" "LAN1" "green:lan1:right" "lan1" "link"
-       ucidef_set_led_netdev "lan2l" "LAN2" "green:lan2:left" "lan2" "tx rx"
-       ucidef_set_led_netdev "lan2r" "LAN2" "green:lan2:right" "lan2" "link"
-       ucidef_set_led_netdev "lan3l" "LAN3" "green:lan3:left" "lan3" "tx rx"
-       ucidef_set_led_netdev "lan3r" "LAN3" "green:lan3:right" "lan3" "link"
-       ucidef_set_led_netdev "lan4l" "LAN4" "green:lan4:left" "lan4" "tx rx"
-       ucidef_set_led_netdev "lan4r" "LAN4" "green:lan4:right" "lan4" "link"
+       ucidef_set_led_netdev "lan1-link" "P1-LINK" "green:lan1:right" "lan1" "link"
+       ucidef_set_led_netdev "lan1-act"  "P1-ACT"  "green:lan1:left"  "lan1" "rx tx"
+       ucidef_set_led_netdev "lan2-link" "P2-LINK" "green:lan2:right" "lan2" "link"
+       ucidef_set_led_netdev "lan2-act"  "P2-ACT"  "green:lan2:left"  "lan2" "rx tx"
+       ucidef_set_led_netdev "lan3-link" "P3-LINK" "green:lan3:right" "lan3" "link"
+       ucidef_set_led_netdev "lan3-act"  "P3-ACT"  "green:lan3:left"  "lan3" "rx tx"
+       ucidef_set_led_netdev "lan4-link" "P4-LINK" "green:lan4:right" "lan4" "link"
+       ucidef_set_led_netdev "lan4-act"  "P4-ACT"  "green:lan4:left"  "lan4" "rx tx"
        ;;
 
 esac
