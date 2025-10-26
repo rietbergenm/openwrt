@@ -96,8 +96,6 @@
 			gpios = <&stp 23 GPIO_ACTIVE_LOW>;
 		};
 
-
-		// should we call these act/link instead of left/right?
 		lan1-left {
 			label = "green:lan1:left";
 			gpios = <&stp 8 GPIO_ACTIVE_HIGH>;
@@ -141,7 +139,6 @@
 
 	usb0_vbus: regulator-usb0-vbus {
 		compatible = "regulator-fixed";
-
 		regulator-name = "USB0_VBUS";
 
 		regulator-min-microvolt = <5000000>;
