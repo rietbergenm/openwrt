@@ -271,9 +271,13 @@
 		pinctrl-0 = <&nand_pins>, <&nand_cs1_pins>;
 		pinctrl-names = "default";
 
+		// we need to match u-boot's settings
 		nand-on-flash-bbt;
+		nand-use-soft-ecc-engine;
+		nand-ecc-algo = "hamming";
+		nand-ecc-step-size = <256>;
+		nand-ecc-strength = <1>;
 
-		// ecc?
 
 		partitions {
 			compatible = "fixed-partitions";
