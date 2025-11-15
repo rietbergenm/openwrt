@@ -150,8 +150,17 @@
 				offset = <0x10>;
 				mask = <0xe0000000>;
 				
-				// do we need more; like regmap?
-				// we probably do
+				/* draytek-specific reboot modes are a thing,
+				 * DrayBoot supports a tftp server mode for example.
+				 * however, these should not go in this file, but in a
+				 * shared dtsi for draytek devices.
+				 * look at syscon-reboot-mode/reboot-mode
+				 */
+
+				/*
+				 * in addition, poweroff does not work,
+			     * we always reboot for some reason
+				 */
 			};
 		};
 	};
