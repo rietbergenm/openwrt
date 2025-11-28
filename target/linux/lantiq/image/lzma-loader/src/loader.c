@@ -170,22 +170,26 @@ static void lzma_init_data(void)
 static void lzma_init_data(void)
 {
 	struct image_header *hdr = NULL;
-	unsigned char *flash_base;
-	unsigned long flash_ofs;
+	unsigned char *search_base;
+	unsigned long search_ofs;
 	unsigned long kernel_ofs;
 	unsigned long kernel_size;
 
-	flash_base = (unsigned char *) KSEG1ADDR(CONFIG_FLASH_START);
+#ifdef CONFIG_SEARCH_START
+	search_base = (unsigned char *) CONFIG_SEARCH_START;
+#else
+	search_base = (unsigned char *) KSEG1ADDR(CONFIG_FLASH_START);
+#endif
 
 	printf("Looking for OpenWrt image... ");
 
-	for (flash_ofs = CONFIG_FLASH_OFFS;
-	     flash_ofs <= (CONFIG_FLASH_OFFS + CONFIG_FLASH_MAX);
-	     flash_ofs += CONFIG_FLASH_STEP) {
+	for (search_ofs = CONFIG_SEARCH_OFFS;
+	     search_ofs <= (CONFIG_SEARCH_OFFS + CONFIG_SEARCH_MAX);
+	     search_ofs += CONFIG_SEARCH_STEP) {
 		unsigned long magic;
 		unsigned char *p;
 
-		p = flash_base + flash_ofs;
+		p = search_base + search_ofs;
 		magic = get_be32(p);
 #ifdef CONFIG_KERNEL_MAGIC
 		if (magic == CONFIG_KERNEL_MAGIC) {
@@ -202,13 +206,13 @@ static void lzma_init_data(void)
 		halt();
 	}
 
-	printf("found at 0x%08x\n", flash_base + flash_ofs);
+	printf("found at 0x%08x\n", search_base + search_ofs);
 
 	kernel_ofs = sizeof(struct image_header);
 	kernel_size = get_be32(&hdr->ih_size);
 	kernel_la = get_be32(&hdr->ih_load);
 
-	lzma_data = flash_base + flash_ofs + kernel_ofs;
+	lzma_data = search_base + search_ofs + kernel_ofs;
 	lzma_datasize = kernel_size;
 }
 #endif /* (LZMA_WRAPPER) */
