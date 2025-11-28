@@ -12,16 +12,16 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#ifndef CONFIG_FLASH_OFFS
-#define CONFIG_FLASH_OFFS	0
+#ifndef CONFIG_SEARCH_OFFS
+#define CONFIG_SEARCH_OFFS	0
 #endif
 
-#ifndef CONFIG_FLASH_MAX
-#define CONFIG_FLASH_MAX	0
+#ifndef CONFIG_SEARCH_MAX
+#define CONFIG_SEARCH_MAX	0
 #endif
 
-#ifndef CONFIG_FLASH_STEP
-#define CONFIG_FLASH_STEP	0x1000
+#ifndef CONFIG_SEARCH_STEP
+#define CONFIG_SEARCH_STEP	0x1000
 #endif
 
 #endif /* _CONFIG_H_ */

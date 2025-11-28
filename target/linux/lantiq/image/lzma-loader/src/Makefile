@@ -20,9 +20,9 @@ LZMA_TEXT_START	:=
 LOADER_DATA	:=
 KERNEL_MAGIC	:=
 BOARD		:=
-FLASH_START	:=
-FLASH_OFFS	:=
-FLASH_MAX	:=
+SEARCH_START	:=
+SEARCH_OFFS	:=
+SEARCH_MAX	:=
 PLATFORM	:=
 CACHE_FLAGS	:=
 
@@ -75,12 +75,17 @@ endif
 ifneq ($(strip $(FLASH_START)),)
 CFLAGS		+= -DCONFIG_FLASH_START=$(FLASH_START)
 endif
-ifneq ($(strip $(FLASH_OFFS)),)
-CFLAGS		+= -DCONFIG_FLASH_OFFS=$(FLASH_OFFS)
+
+ifneq ($(strip $(SEARCH_START)),)
+CFLAGS		+= -DCONFIG_SEARCH_START=$(SEARCH_START)
 endif
 
-ifneq ($(strip $(FLASH_MAX)),)
-CFLAGS		+= -DCONFIG_FLASH_MAX=$(FLASH_MAX)
+ifneq ($(strip $(SEARCH_OFFS)),)
+CFLAGS		+= -DCONFIG_SEARCH_OFFS=$(SEARCH_OFFS)
+endif
+
+ifneq ($(strip $(SEARCH_MAX)),)
+CFLAGS		+= -DCONFIG_SEARCH_MAX=$(SEARCH_MAX)
 endif
 
 BOARD_DEF := $(shell echo $(strip $(BOARD)) | tr a-z A-Z | tr - _)
