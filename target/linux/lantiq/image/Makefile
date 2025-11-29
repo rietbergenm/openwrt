@@ -69,8 +69,8 @@ endef
 define Build/loader-okli-compile
 	$(call Build/loader-common, \
 		FLASH_START=0x10000000 \
-		FLASH_OFFS=$(LOADER_FLASH_OFFS) \
-		FLASH_MAX=0x0 \
+		SEARCH_OFFS=$(LOADER_FLASH_OFFS) \
+		SEARCH_MAX=0x0 \
 	)
 endef
 
