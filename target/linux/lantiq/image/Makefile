@@ -55,7 +55,6 @@ define Build/loader-common
 		PKG_BUILD_DIR="$@.src" \
 		TARGET_DIR="$(dir $@)" LOADER_NAME="$(notdir $@)" \
 		BOARD="$(BOARDNAME)" PLATFORM="lantiq" \
-		LZMA_TEXT_START=0x82000000 \
 		LOADADDR=0x80002000 \
 		$(1) compile loader.bin
 	mv "$@.bin" "$@"
@@ -63,11 +62,15 @@ define Build/loader-common
 endef
 
 define Build/loader-kernel
-	$(call Build/loader-common,LOADER_DATA="$@")
+	$(call Build/loader-common, \
+		LZMA_TEXT_START=0x82000000 \
+		LOADER_DATA="$@" \
+	)
 endef
 
 define Build/loader-okli-compile
 	$(call Build/loader-common, \
+		LZMA_TEXT_START=0x82000000 \
 		FLASH_START=0x10000000 \
 		SEARCH_OFFS=$(LOADER_FLASH_OFFS) \
 		SEARCH_MAX=0x0 \
