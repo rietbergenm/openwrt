@@ -1,5 +1,6 @@
 define Device/draytek_vigor2862
   $(Device/NAND)
+  $(Device/DrayTek_preloader)
   DEVICE_VENDOR := Draytek
   DEVICE_MODEL := Vigor2862
   SOC := xrx330

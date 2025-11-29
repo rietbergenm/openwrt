@@ -77,6 +77,14 @@ define Build/loader-okli-eva-compile
 	)
 endef
 
+define Build/loader-okli-draytek-compile
+	$(call Build/loader-common, \
+		LZMA_TEXT_START=0x80024000 \
+		SEARCH_START=0x86000000 \
+		SEARCH_MAX=0x80000 \
+	)
+endef
+
 define Build/prepend-loader-okli
 	cat "$(KDIR)/loader-$(word 1,$(1)).bin" "$@" >> "$@.new"
 	mv "$@.new" "$@"
@@ -148,6 +156,14 @@ define Device/AVM_preloader
   KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49 | \
 	prepend-loader-okli $(1)
   KERNEL_INITRAMFS := kernel-bin | append-dtb | lzma | eva-image
+endef
+
+define Device/DrayTek_preloader
+  DEVICE_VENDOR := DrayTek
+  COMPILE := loader-$(1).bin
+  COMPILE/loader-$(1).bin := loader-okli-draytek-compile | pad-to 4k
+  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49 | \
+	prepend-loader-okli $(1)
 endef
 
 ifeq ($(SUBTARGET),ase)
