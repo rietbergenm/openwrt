@@ -55,7 +55,6 @@ define Build/loader-common
 		PKG_BUILD_DIR="$@.src" \
 		TARGET_DIR="$(dir $@)" LOADER_NAME="$(notdir $@)" \
 		BOARD="$(BOARDNAME)" PLATFORM="lantiq" \
-		LOADADDR=0x80002000 \
 		$(1) compile loader.bin
 	mv "$@.bin" "$@"
 	rm -rf $@.src
@@ -64,6 +63,7 @@ endef
 define Build/loader-kernel
 	$(call Build/loader-common, \
 		LZMA_TEXT_START=0x82000000 \
+		LOADADDR="$(KERNEL_LOADADDR)" \
 		LOADER_DATA="$@" \
 	)
 endef
@@ -71,16 +71,26 @@ endef
 define Build/loader-okli-eva-compile
 	$(call Build/loader-common, \
 		LZMA_TEXT_START=0x82000000 \
+		LOADADDR="$(KERNEL_LOADADDR)" \
 		FLASH_START=0x10000000 \
 		SEARCH_OFFS=$(LOADER_FLASH_OFFS) \
 		SEARCH_MAX=0x0 \
 	)
 endef
 
+# DrayBoot always loads first 512K of DrayOS (and thus lmza-loader in our case)
+# at 0x80024000, so it has to run at that address and we can't load the kernel
+# at 0x80002000, as that would overwrite lzma-loader itself. The entire DrayOS
+# image (including the header) is placed in memory at 0x86000000, so that is
+# where we start looking. We padded lzma-loader to 4k as we search in steps of
+# 4k, so we should start looking at the start of the loader, not at start of
+# the header, as we will miss the OKLI uImage because of alignment.
 define Build/loader-okli-draytek-compile
 	$(call Build/loader-common, \
 		LZMA_TEXT_START=0x80024000 \
+		LOADADDR="$(KERNEL_LOADADDR)" \
 		SEARCH_START=0x86000000 \
+		SEARCH_OFFS=0x100 \
 		SEARCH_MAX=0x80000 \
 	)
 endef
@@ -160,6 +170,7 @@ endef
 
 define Device/DrayTek_preloader
   DEVICE_VENDOR := DrayTek
+  KERNEL_LOADADDR := 0x82000000
   COMPILE := loader-$(1).bin
   COMPILE/loader-$(1).bin := loader-okli-draytek-compile | pad-to 4k
   KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49 | \
