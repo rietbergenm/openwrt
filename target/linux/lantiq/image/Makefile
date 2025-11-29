@@ -68,7 +68,7 @@ define Build/loader-kernel
 	)
 endef
 
-define Build/loader-okli-compile
+define Build/loader-okli-eva-compile
 	$(call Build/loader-common, \
 		LZMA_TEXT_START=0x82000000 \
 		FLASH_START=0x10000000 \
@@ -143,7 +143,7 @@ endef
 define Device/AVM_preloader
   DEVICE_VENDOR := AVM
   COMPILE := loader-$(1).bin
-  COMPILE/loader-$(1).bin := loader-okli-compile | lzma | eva-image | \
+  COMPILE/loader-$(1).bin := loader-okli-eva-compile | lzma | eva-image | \
 	pad-to 64k | append-avm-fakeroot | pad-to 4k
   KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49 | \
 	prepend-loader-okli $(1)
