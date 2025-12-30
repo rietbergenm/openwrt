@@ -144,7 +144,9 @@ $(eval $(call KernelPackage,vhost-net))
 define KernelPackage/vsock
   SUBMENU:=Virtualization
   TITLE:=Virtual Socket Protocol
-  KCONFIG:=CONFIG_VSOCKETS
+  KCONFIG:=CONFIG_VSOCKETS \
+		   CONFIG_VSOCKETS_LOOPBACK=n \
+		   CONFIG_HYPERV_VSOCKETS=n
   FILES:=$(LINUX_DIR)/net/vmw_vsock/vsock.ko
   AUTOLOAD:=$(call AutoProbe,vsock)
 endef
@@ -160,8 +162,8 @@ $(eval $(call KernelPackage,vsock))
 
 define KernelPackage/vsock-virtio-common
   SUBMENU:=Virtualization
-  TITLE:=Common interface driver for virtio vsockets
-  DEPENDS:=+(!TARGET_x86_64&&!TARGET_loongarch64):kmod-vsock
+  TITLE:=Module used by other drivers to access Virtio Virtual Sockets
+  DEPENDS:=+kmod-vsock
   KCONFIG:=CONFIG_VIRTIO_VSOCKETS_COMMON
   FILES:=$(LINUX_DIR)/net/vmw_vsock/vmw_vsock_virtio_transport_common.ko
   AUTOLOAD:=$(call AutoProbe,vmw_vsock_virtio_transport_common)
@@ -174,9 +176,7 @@ $(eval $(call KernelPackage,vsock-virtio-common))
 define KernelPackage/vsock-virtio
   SUBMENU:=Virtualization
   TITLE:=Virtio transport driver for Virtual Sockets
-  DEPENDS:= \
-		 +(!TARGET_x86_64&&!TARGET_loongarch64):kmod-vsock \
-		 +(!TARGET_x86_64&&!TARGET_loongarch64):kmod-vsock-virtio-common
+  DEPENDS:= @VIRTIO_SUPPORT +kmod-vsock +kmod-vsock-virtio-common
   KCONFIG:=CONFIG_VIRTIO_VSOCKETS
   FILES:=$(LINUX_DIR)/net/vmw_vsock/vmw_vsock_virtio_transport.ko
   AUTOLOAD:=$(call AutoProbe,vmw_vsock_virtio_transport)
